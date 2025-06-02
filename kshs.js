@@ -1,5 +1,5 @@
 
-const ws = new WebSocket('wss://kshs-quiz1.onrender.com'); // Your actual deployed WebSocket URL
+const ws = new WebSocket('wss://kshs-quiz1.onrender.com'); // your deployed WebSocket URL
 
 ws.onopen = () => {
   console.log('Connected to WebSocket server');
@@ -7,7 +7,7 @@ ws.onopen = () => {
 
 ws.onmessage = (event) => {
   const data = JSON.parse(event.data);
-  console.log('Message from server:', data);
+  console.log("Received:", data);
 
   if (data.type === 'registerSuccess') {
     alert(`Student ${data.studentId} registered successfully.`);
@@ -20,11 +20,13 @@ ws.onmessage = (event) => {
     alert(data.message);
   }
 
-  // You can continue handling other message types here (e.g., sendQuestion, reset, etc.)
+  // Add additional WebSocket response handling below as needed
 };
 
 document.addEventListener('DOMContentLoaded', () => {
   const registerButton = document.querySelector('.js-register-button');
+  const removeButton = document.querySelector('.js-remove-button');
+
   registerButton.addEventListener('click', () => {
     let stdName = document.querySelector('.student-name').value.trim();
     let stdId = document.querySelector('.student-id').value.trim();
@@ -45,7 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
     ws.send(JSON.stringify(studentObj));
   });
 
-  const removeButton = document.querySelector('.js-remove-button');
   if (removeButton) {
     removeButton.addEventListener('click', () => {
       if (ws.readyState === WebSocket.OPEN) {
@@ -58,5 +59,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Add other buttons like question sender, etc. here...
+  // Add more button event handlers below if needed (e.g., send question)
 });
