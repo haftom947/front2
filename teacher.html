@@ -3,92 +3,103 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Teacher Login</title>
+  <title>Host Control Page</title>
   <link rel="stylesheet" href="kshs.css" />
+  <script>
+    // Redirect to login page if not authenticated
+    if (localStorage.getItem('isTeacherAuthenticated') !== 'true') {
+      window.location.href = 'teacher-login.html';
+    }
+  </script>
 </head>
 <body>
-  <div class="login-form">
-    <h2>Teacher Login</h2>
-    <input type="password" id="teacher-password" placeholder="Enter Password" required />
-    <button id="login-button">Login</button>
-    <p id="error-message" style="color: red; display: none;">Invalid password. Please try again.</p>
-
-    <button id="show-change-password" style="margin-top: 10px;">Change Password</button>
-
-    <div id="change-password-section" style="display: none; margin-top: 15px;">
-      <input type="password" id="current-teacher-password" placeholder="Current Password" /><br />
-      <input type="password" id="new-teacher-password" placeholder="New Password" style="margin-top: 5px;" /><br />
-      <input type="password" id="confirm-new-password" placeholder="Confirm New Password" style="margin-top: 5px;" />
-      <button id="change-password-button" style="margin-top: 10px;">Save New Password</button>
-
-      <p id="change-password-message" style="color: green; display: none;">Password changed!</p>
-      <p id="change-password-error" style="color: red; display: none;"></p>
+  <div class="main-host-page">
+    <h1 class="host-title">Host Control Page</h1>
+    <div class="register-area">
+      <input class="student-name" type="text" placeholder="Enter student Name" required />
+      <input class="student-id" type="text" placeholder="Enter Student ID" required />
+      <input class="student-password" type="password" placeholder="Set student's Entry code" required />
+      <button class="register-button js-register-button">Register</button>
+      <button class="remove-button js-remove-button">Remove</button>
     </div>
+
+    <div class="selection-all">
+      <div class="student-selection">
+        <label for="student-id">Select a Student</label>
+        <select name="Student" id="student-id">
+          <option value="S1" selected>S1</option>
+          <option value="S2">S2</option>
+          <option value="S3">S3</option>
+          <option value="S4">S4</option>
+          <option value="S5">S5</option>
+          <option value="S6">S6</option>
+        </select>
+      </div>
+
+      <div class="subject-selection">
+        <label for="subject">Select a Subject</label>
+        <select name="Subject" id="subject">
+          <option value="maths" selected>Maths</option>
+          <option value="english">English</option>
+          <option value="chemistry">Chemistry</option>
+          <option value="biology">Biology</option>
+          <option value="tigrigna">Tigrigna</option>
+          <option value="economics">Economics</option>
+          <option value="physics">Physics</option>
+          <option value="geography">Geography</option>
+        </select>
+      </div>
+
+      <div class="question-selection">
+        <label for="question-no">Select Question</label>
+        <select id="question-no">
+          <option value="q1" selected>Q1</option>
+          <option value="q2">Q2</option>
+          <option value="q3">Q3</option>
+          <option value="q4">Q4</option>
+          <option value="q5">Q5</option>
+          <option value="q6">Q6</option>
+          <option value="q7">Q7</option>
+          <option value="q8">Q8</option>
+          <option value="q9">Q9</option>
+          <option value="q10">Q10</option>
+          <option value="q11">Q11</option>
+          <option value="q12">Q12</option>
+        </select>
+      </div>
+
+      <button class="send-button">Send Question</button>
+      <button class="question-entry-button js-question-entry-button">Enter Your Question</button>
+
+      <div class="questions-entry js-question-entry">
+        <label for="subject-question">Select a Subject</label>
+        <select name="Subject" id="subject-question">
+          <option value="nothing" selected disabled>Here</option>
+          <option value="maths">Maths</option>
+          <option value="english">English</option>
+          <option value="chemistry">Chemistry</option>
+          <option value="biology">Biology</option>
+          <option value="tigrigna">Tigrigna</option>
+          <option value="economics">Economics</option>
+          <option value="physics">Physics</option>
+          <option value="geography">Geography</option>
+        </select>
+      </div>
+
+      <div class="question-web js-question-web"></div>
+    </div>
+
+    <button id="logout-button">Logout</button>
   </div>
 
+  <script src="DayJS/dayjs.min.js"></script>
+  <script type="module" src="kshs.js"></script>
+
+  <!-- ✅ Logout Handler Script -->
   <script>
-    // Set default password if none exists
-    if (localStorage.getItem('teacherPassword') === null) {
-      localStorage.setItem('teacherPassword', 'teacher123');
-    }
-
-    // Handle login
-    document.getElementById('login-button').addEventListener('click', () => {
-      const enteredPassword = document.getElementById('teacher-password').value;
-      const storedPassword = localStorage.getItem('teacherPassword');
-
-      if (enteredPassword === storedPassword) {
-        localStorage.setItem('isTeacherAuthenticated', 'true');
-        window.location.href = 'teacher.html'; // Adjust if needed
-      } else {
-        document.getElementById('error-message').style.display = 'block';
-      }
-    });
-
-    // Show password change section
-    document.getElementById('show-change-password').addEventListener('click', () => {
-      document.getElementById('change-password-section').style.display = 'block';
-      document.getElementById('change-password-message').style.display = 'none';
-      document.getElementById('change-password-error').style.display = 'none';
-    });
-
-    // Handle password change
-    document.getElementById('change-password-button').addEventListener('click', () => {
-      const currentPassword = document.getElementById('current-teacher-password').value;
-      const newPassword = document.getElementById('new-teacher-password').value;
-      const confirmPassword = document.getElementById('confirm-new-password').value;
-      const storedPassword = localStorage.getItem('teacherPassword');
-
-      const errorMsg = document.getElementById('change-password-error');
-      const successMsg = document.getElementById('change-password-message');
-      errorMsg.style.display = 'none';
-      successMsg.style.display = 'none';
-
-      if (currentPassword !== storedPassword) {
-        errorMsg.textContent = 'Current password is incorrect.';
-        errorMsg.style.display = 'block';
-        return;
-      }
-
-      if (newPassword.length < 4) {
-        errorMsg.textContent = 'New password must be at least 4 characters.';
-        errorMsg.style.display = 'block';
-        return;
-      }
-
-      if (newPassword !== confirmPassword) {
-        errorMsg.textContent = 'Passwords do not match.';
-        errorMsg.style.display = 'block';
-        return;
-      }
-
-      localStorage.setItem('teacherPassword', newPassword);
-      successMsg.style.display = 'block';
-
-      setTimeout(() => {
-        successMsg.style.display = 'none';
-        document.getElementById('change-password-section').style.display = 'none';
-      }, 1500);
+    document.getElementById('logout-button').addEventListener('click', () => {
+      localStorage.removeItem('isTeacherAuthenticated');
+      window.location.href = 'teacher-login.html';
     });
   </script>
 </body>
