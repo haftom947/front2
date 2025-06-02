@@ -35,6 +35,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       ws.send(JSON.stringify(studentObj));
       alert(`Student ${stdName} registered successfully.`);
+      document.querySelector('.student-name').value = '';
+document.querySelector('.student-id').value = '';
+document.querySelector('.student-password').value = '';
+
     });
   }
 
