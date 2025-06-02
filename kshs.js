@@ -103,7 +103,7 @@ document.querySelector('.student-password').value = '';
         const selectedSubject = subjectDropdown.value;
         if (selectedSubject && selectedSubject !== 'nothing') {
           // Redirect to question-web.html with the selected subject
-          window.location.href = `question-web.html?subject=${encodeURIComponent(selectedSubject)}`;
+          window.location.href = `question-entry.html?subject=${encodeURIComponent(selectedSubject)}`;
         }
       });
     }
