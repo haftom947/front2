@@ -34,8 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       ws.send(JSON.stringify(studentObj));
-      alert(`Student ${stdName} registered successfully.`);
-    });
+alert(`Student ${stdName} registered successfully.`);
+// Clear input fields after successful registration
+document.querySelector('.student-name').value = '';
+document.querySelector('.student-id').value = '';
+document.querySelector('.student-password').value = '';
   }
 
   const removeButton = document.querySelector('.js-remove-button');
