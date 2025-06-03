@@ -25,6 +25,10 @@ document.addEventListener('DOMContentLoaded', () => {
       let stdName = document.querySelector('.student-name').value.trim();
       let stdId = document.querySelector('.student-id').value.trim();
       let stdPassword = document.querySelector('.student-password').value.trim();
+       if (!stdName || !stdId || !stdPassword) {
+      alert('Please fill in all the fields before registering.');
+      return;
+    }
 
       const studentObj = {
         type: 'register',
