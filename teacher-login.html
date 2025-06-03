@@ -27,68 +27,112 @@
   </div>
 
   <script>
-    // Set default password if none exists
-    if (localStorage.getItem('teacherPassword') === null) {
-      localStorage.setItem('teacherPassword', 'teacher123');
-    }
+    // --- WebSocket Setup ---
+    const ws = new WebSocket('wss://kshs-quiz1.onrender.com');
 
-    // Handle login
+    // Callbacks for one-time WebSocket responses
+    let wsCallbacks = {};
+
+    ws.onmessage = function(event) {
+      const data = JSON.parse(event.data);
+
+      // Login response
+      if (data.type === 'getTeacherPassword' && wsCallbacks.getTeacherPassword) {
+        wsCallbacks.getTeacherPassword(data);
+      }
+
+      // Password change response
+      if (data.type === 'setTeacherPassword' && wsCallbacks.setTeacherPassword) {
+        wsCallbacks.setTeacherPassword(data);
+      }
+    };
+
+    // ---- LOGIN ----
     document.getElementById('login-button').addEventListener('click', () => {
       const enteredPassword = document.getElementById('teacher-password').value;
-      const storedPassword = localStorage.getItem('teacherPassword');
+      document.getElementById('error-message').style.display = 'none';
 
-      if (enteredPassword === storedPassword) {
-        localStorage.setItem('isTeacherAuthenticated', 'true');
-        window.location.href = 'teacher.html'; // Adjust if needed
-      } else {
-        document.getElementById('error-message').style.display = 'block';
-      }
+      // Request the teacher password from the server
+      ws.send(JSON.stringify({ type: 'getTeacherPassword' }));
+
+      wsCallbacks.getTeacherPassword = function(data) {
+        if (enteredPassword === data.password) {
+          // Success: redirect
+          window.location.href = 'teacher.html';
+        } else {
+          document.getElementById('error-message').style.display = 'block';
+        }
+        wsCallbacks.getTeacherPassword = null;
+      };
     });
 
-    // Show password change section
+    // ---- Show password change section ----
     document.getElementById('show-change-password').addEventListener('click', () => {
       document.getElementById('change-password-section').style.display = 'block';
       document.getElementById('change-password-message').style.display = 'none';
       document.getElementById('change-password-error').style.display = 'none';
     });
 
-    // Handle password change
+    // ---- PASSWORD CHANGE ----
     document.getElementById('change-password-button').addEventListener('click', () => {
       const currentPassword = document.getElementById('current-teacher-password').value;
       const newPassword = document.getElementById('new-teacher-password').value;
       const confirmPassword = document.getElementById('confirm-new-password').value;
-      const storedPassword = localStorage.getItem('teacherPassword');
 
       const errorMsg = document.getElementById('change-password-error');
       const successMsg = document.getElementById('change-password-message');
       errorMsg.style.display = 'none';
       successMsg.style.display = 'none';
 
-      if (currentPassword !== storedPassword) {
-        errorMsg.textContent = 'Current password is incorrect.';
-        errorMsg.style.display = 'block';
-        return;
-      }
-
       if (newPassword.length < 4) {
         errorMsg.textContent = 'New password must be at least 4 characters.';
         errorMsg.style.display = 'block';
         return;
       }
-
       if (newPassword !== confirmPassword) {
         errorMsg.textContent = 'Passwords do not match.';
         errorMsg.style.display = 'block';
         return;
       }
 
-      localStorage.setItem('teacherPassword', newPassword);
-      successMsg.style.display = 'block';
+      // Send change password request
+      ws.send(JSON.stringify({
+        type: 'setTeacherPassword',
+        currentPassword: currentPassword,
+        newPassword: newPassword
+      }));
 
-      setTimeout(() => {
-        successMsg.style.display = 'none';
-        document.getElementById('change-password-section').style.display = 'none';
-      }, 1500);
+      wsCallbacks.setTeacherPassword = function(data) {
+        if (data.status === 'success') {
+          successMsg.style.display = 'block';
+          setTimeout(() => {
+            successMsg.style.display = 'none';
+            document.getElementById('change-password-section').style.display = 'none';
+            // Optionally clear fields
+            document.getElementById('current-teacher-password').value = '';
+            document.getElementById('new-teacher-password').value = '';
+            document.getElementById('confirm-new-password').value = '';
+          }, 1500);
+        } else {
+          errorMsg.textContent = data.message;
+          errorMsg.style.display = 'block';
+        }
+        wsCallbacks.setTeacherPassword = null;
+      };
+    });
+
+    // Optional: Hide error messages when user starts typing in password fields
+    document.getElementById('teacher-password').addEventListener('input', () => {
+      document.getElementById('error-message').style.display = 'none';
+    });
+    document.getElementById('current-teacher-password').addEventListener('input', () => {
+      document.getElementById('change-password-error').style.display = 'none';
+    });
+    document.getElementById('new-teacher-password').addEventListener('input', () => {
+      document.getElementById('change-password-error').style.display = 'none';
+    });
+    document.getElementById('confirm-new-password').addEventListener('input', () => {
+      document.getElementById('change-password-error').style.display = 'none';
     });
   </script>
 </body>
