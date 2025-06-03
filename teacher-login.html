@@ -54,16 +54,17 @@
 
       // Request the teacher password from the server
       ws.send(JSON.stringify({ type: 'getTeacherPassword' }));
-
-      wsCallbacks.getTeacherPassword = function(data) {
-        if (enteredPassword === data.password) {
-          // Success: redirect
-          window.location.href = 'teacher.html';
-        } else {
-          document.getElementById('error-message').style.display = 'block';
-        }
-        wsCallbacks.getTeacherPassword = null;
-      };
+wsCallbacks.getTeacherPassword = function(data) {
+  if (enteredPassword === data.password) {
+    // Success: set auth flag, then redirect
+    localStorage.setItem('isTeacherAuthenticated', 'true');
+    window.location.href = 'teacher.html';
+  } else {
+    document.getElementById('error-message').style.display = 'block';
+  }
+  wsCallbacks.getTeacherPassword = null;
+};
+    
     });
 
     // ---- Show password change section ----
