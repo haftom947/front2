@@ -32,7 +32,7 @@
       // Hide error message on success
       const errorMsg = document.getElementById('error-message');
       if (errorMsg) errorMsg.style.display = 'none';
-      window.location.href = 'student-question.html';
+      window.location.href = 'index.html';
     } else if (data.type === 'login' && data.status === 'error') {
       // Show error message on failure
       const errorMsg = document.getElementById('error-message');
