@@ -4,7 +4,122 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Teacher Login</title>
-  <link rel="stylesheet" href="kshs.css" />
+  <style>
+  body {
+  min-height: 100vh;
+  margin: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(120deg, #1e3c72, #2a5298 70%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-form {
+  background: #fff;
+  padding: 2.5rem 2rem 2rem 2rem;
+  border-radius: 1.2rem;
+  box-shadow: 0 8px 32px rgba(30, 60, 114, 0.18);
+  width: 100%;
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.login-form h2 {
+  margin-bottom: 1.2rem;
+  color: #2a5298;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.login-form input[type="password"] {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  margin: 0.35rem 0;
+  border: 1px solid #cfd8dc;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background: #f7fafd;
+  transition: border 0.2s;
+}
+.login-form input[type="password"]:focus {
+  border-color: #2a5298;
+  outline: none;
+}
+
+.login-form button {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  margin-top: 0.8rem;
+  background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%);
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  box-shadow: 0 2px 8px rgba(30, 60, 114, 0.08);
+}
+.login-form button:hover, .login-form button:focus {
+  background: linear-gradient(90deg, #2a5298 0%, #1e3c72 100%);
+  transform: translateY(-2px) scale(1.03);
+}
+
+#change-password-section {
+  width: 100%;
+  background: #f7fafd;
+  padding: 1rem;
+  border-radius: 0.7rem;
+  margin-top: 1rem;
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.06);
+}
+
+#change-password-section input[type="password"] {
+  margin-bottom: 0.5rem;
+}
+
+#change-password-section button {
+  margin-top: 0.6rem;
+}
+
+#error-message,
+#change-password-error {
+  color: #d90429 !important;
+  background: #ffe6e9;
+  border-radius: 0.4rem;
+  padding: 0.5rem 0.8rem;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0.2rem 0 0.5rem 0;
+  font-size: 0.98rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+#change-password-message {
+  color: #218838 !important;
+  background: #e6ffee;
+  border-radius: 0.4rem;
+  padding: 0.5rem 0.8rem;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0.2rem 0 0.5rem 0;
+  font-size: 0.98rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .login-form {
+    max-width: 96vw;
+    padding: 1.5rem 0.5rem;
+    border-radius: 0.7rem;
+  }
+}
+    </style>
 </head>
 <body>
   <div class="login-form">
