@@ -2,11 +2,15 @@ const ws = new WebSocket('wss://kshs-quiz1.onrender.com'); // Use your actual PC
 
 ws.onopen = () => {
   console.log('Connected to WebSocket server');
+  ws.send(JSON.stringify({ type: "registerTeacher" }));
 };
 
 ws.onmessage = (event) => {
   const data = JSON.parse(event.data);
   console.log('Message from server:', data);
+  if (data.type === 'studentAnswered') {
+  showTeacherOverlay(data); // displays student answer and feedback
+}
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -113,3 +117,31 @@ document.querySelector('.student-password').value = '';
     }
   }
 });
+function showTeacherOverlay({ studentId, question, answer, feedback }) {
+  let overlay = document.getElementById('teacher-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'teacher-overlay';
+    overlay.style.position = 'fixed';
+    overlay.style.top = '10px';
+    overlay.style.right = '10px';
+    overlay.style.background = 'rgba(0,0,0,0.9)';
+    overlay.style.color = '#fff';
+    overlay.style.padding = '20px';
+    overlay.style.borderRadius = '8px';
+    overlay.style.zIndex = 1000;
+    overlay.style.maxWidth = '380px';
+    overlay.style.fontSize = '1rem';
+    overlay.style.boxShadow = '0 2px 10px rgba(0,0,0,0.5)';
+    document.body.appendChild(overlay);
+  }
+  let html = `<b>Student:</b> ${studentId}<br><b>Question:</b> ${question}`;
+  if (answer) {
+    html += `<br><b>Answer:</b> ${answer}`;
+  }
+  if (feedback) {
+    html += `<br><b>Feedback:</b> <span style="color:${feedback === 'Correct!' ? 'lightgreen' : 'red'}">${feedback}</span>`;
+  }
+  overlay.innerHTML = html;
+  overlay.style.display = 'block';
+}
