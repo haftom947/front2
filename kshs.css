@@ -1,302 +1,91 @@
-/* === GENERAL STYLING: Projector & PC Friendly === */
-body {
-  font-family: 'Segoe UI', Arial, sans-serif;
-  font-size: 18px; /* reduced from 22px */
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  background: linear-gradient(135deg, #1e3c72, #2a5298 70%);
-  background-size: 400% 400%;
-  animation: gradientAnimate 20s ease infinite;
-}
-@keyframes gradientAnimate {
-  0% {background-position: 0% 50%;}
-  50% {background-position: 100% 50%;}
-  100% {background-position: 0% 50%;}
-}
-body::before {
-  content: "";
-  position: fixed;
-  top: 0; left: 0; width: 100vw; height: 100vh;
-  background: rgba(255,255,255,0.06);
-  pointer-events: none;
-  z-index: -1;
-}
+/* Grouping and layout for teacher.html */
 
-/* === MAIN HOST PANEL === */
-.main-host-page {
-  position: relative;
-  width: 96vw;
-  max-width: 950px;
-  background-color: #ffffffee;
-  border-radius: 18px;
-  padding: 24px 18px 15px 18px;
-  margin-top: 30px;
-  margin-bottom: 40px;
-  box-shadow: 0px 8px 36px rgba(0, 0, 0, 0.18);
-  border: 2.5px solid #1966c0;
-  font-size: 1em;
-}
-
-/* === TITLE === */
-.host-title {
-  text-align: center;
-  color: #1966c0;
-  font-size: 2em;
-  font-weight: bold;
-  letter-spacing: 1.5px;
-  margin-bottom: 16px;
-}
-
-/* === REGISTER/REMOVE/SHOW BUTTON AREA === */
 .register-area {
   display: flex;
-  flex-wrap: wrap;
-  gap: 1em;
-  align-items: center;
-  margin-bottom: 1.2em;
-}
-.register-area input {
-  width: 200px;
-  max-width: 97vw;
-  height: 28px;
-  padding: 8px;
-  margin: 0.3em 0;
-  border: 1.5px solid #bdd7ee;
-  border-radius: 7px;
-  font-size: 0.95em;
-  background: #f8fbff;
-  outline: none;
-  transition: border 0.2s, box-shadow 0.2s;
-}
-.register-area input:focus {
-  border-color: #2176ff;
-  box-shadow: 0 0 10px #2176ff22;
-}
-
-/* === ACTION BUTTONS (Register, Remove, etc.) === */
-button,
-.teacher-action,
-.teacher-action-btn {
-  display: inline-block;
-  margin: 0.4em 0.5em 0.4em 0;
-  padding: 0.5em 1.4em;
-  font-size: 1em;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  background: linear-gradient(90deg, #2176ff 50%, #19bfff 100%);
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  font-weight: 700;
-  box-shadow: 0 2px 10px rgba(33,118,255,0.10);
-  cursor: pointer;
-  letter-spacing: 1px;
-  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
-}
-button:hover,
-.teacher-action:hover,
-.teacher-action-btn:hover {
-  background: linear-gradient(90deg, #135299 30%, #1966c0 100%);
-  box-shadow: 0 4px 12px rgba(25,102,192,0.13);
-  transform: scale(1.04);
-}
-.register-button {
-  background: linear-gradient(90deg, #007bff 60%, #539be8 100%);
-}
-.register-button:hover {
-  background: linear-gradient(90deg, #0096b3 60%, #497ec9 100%);
-}
-.remove-button {
-  background: linear-gradient(90deg, #ff4b5c 60%, #ff7f7f 100%);
-}
-.remove-button:hover {
-  background: linear-gradient(90deg, #d62f50 60%, #e49565 100%);
-}
-.send-button {
-  background: linear-gradient(90deg, #ff6347 60%, #ff8566 100%);
-}
-.send-button:hover {
-  background: linear-gradient(90deg, #e24c36 60%, #ff6450 100%);
-}
-.question-entry-button {
-  background: linear-gradient(90deg, #ffcc00 60%, #ff9900 100%);
-  color: white;
-  border: 2px solid #ff9900;
-  box-shadow: 0px 2px 8px rgba(255, 153, 0, 0.22);
-  position: absolute;
-  margin-top: 15px;
-  margin-left: 10px;
-  bottom: 45px;
-  left: 0;
-  width: 180px;
-  max-width: 93vw;
-  font-size: 1em;
-  padding: 0.45em 0.8em;
-}
-.question-entry-button:hover {
-  background: linear-gradient(90deg, #ff5500 60%, #ff6600 100%);
-  transform: scale(1.06);
-  box-shadow: 0px 2px 10px rgba(255, 153, 0, 0.28);
-}
-
-/* === SELECTION AREA === */
-.selection-all {
-  border: 2.5px solid #e6c49f;
-  box-shadow: inset 40px 40px 12px rgba(0,110,255,0.06),
-              inset -40px -40px 12px rgba(0,110,255,0.06);
-  margin: 14px auto;
-  padding: 8px 10px 10px 10px;
-  width: 94%;
-  max-width: 650px;
-  border-radius: 10px;
-  background: #fcfcfd;
-}
-.selection-all select {
-  width: 120px;
-  height: 30px;
-  border-radius: 5px;
-  border: 1.5px solid #007bff;
-  padding: 4px 6px;
-  font-size: 0.98em;
-}
-.selection-all label {
-  margin-right: 10px;
-  font-weight: 600;
-  color: #1966c0;
-}
-
-/* === OVERLAY: Projector & PC Friendly, Fully Scrollable === */
-#teacher-overlay {
-  position: fixed;
-  top: 3vh;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 9999;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 6px 30px rgba(0,0,0,0.22);
-  width: 40vw;
-  min-width: 320px;
-  max-width: 600px;
-  padding: 1.5em 1em 1.5em 1em;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  color: #1e2a36;
-  font-size: 1.1em;
-  animation: overlayDropIn 0.5s;
-  border: 3px solid #1966c0;
-  overflow-y: auto;
-  max-height: 88vh;
-  overscroll-behavior: contain;
-}
-@keyframes overlayDropIn {
-  from { opacity: 0; transform: translate(-50%, -30px);}
-  to   { opacity: 1; transform: translate(-50%, 0);}
-}
-#teacher-overlay h2 {
-  font-size: 2em;
-  color: #1966c0;
-  text-align: center;
-  margin-bottom: 0.5em;
-  letter-spacing: 2px;
-}
-#teacher-overlay .student-label {
-  display: block;
-  font-size: 1.1em;
-  color: #0a3557;
-  margin-bottom: 0.3em;
-  font-weight: 600;
-  text-align: center;
-}
-#teacher-overlay .question-box {
-  font-size: 1.13em;
-  margin: 0.8em 0 1.3em 0;
-  color: #222;
-  text-align: center;
-  font-weight: bold;
-}
-#teacher-overlay .choices {
-  display: flex;
   flex-direction: column;
-  gap: 0.5em;
-  margin-bottom: 1em;
+  gap: 18px;
+  margin-bottom: 32px;
 }
-#teacher-overlay .choice-label {
-  padding: 0.5em 1em;
-  background: #f4f8fd;
-  border-radius: 9px;
-  border: 2px solid #bdd7ee;
-  font-size: 1em;
-  color: #114266;
-  cursor: default;
-  box-shadow: 0 1px 4px rgba(25,102,192,0.08);
+
+.register-fields-group {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
 }
-#teacher-overlay .answer-row {
-  font-size: 1em;
-  margin-bottom: 0.4em;
-  text-align: center;
+
+.register-fields-group input {
+  flex: 1 1 0;
+  min-width: 120px;
 }
-#teacher-overlay .feedback {
-  font-size: 1.15em;
-  font-weight: bold;
-  text-align: center;
-  margin-top: 0.7em;
-  margin-bottom: 0.7em;
-  padding: 0.3em 0.7em;
-  border-radius: 10px;
-  display: inline-block;
+
+.register-buttons-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 }
-#teacher-overlay .feedback.correct {
-  color: #2e7d32;
-  background: #d1f5d3;
-  border: 2px solid #5ea96c;
+
+.register-buttons-group button {
+  flex: 1 1 0;
+  min-width: 140px;
 }
-#teacher-overlay .feedback.incorrect {
-  color: #b71c1c;
-  background: #ffd2d2;
-  border: 2px solid #e57373;
+
+.selects-and-send-group {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
 }
-#teacher-overlay .close-btn {
+
+.selects-and-send-group > div {
+  flex: 1 1 150px;
+  min-width: 140px;
+}
+
+.selects-and-send-group .send-button {
+  min-width: 140px;
+  height: 42px;
+  align-self: flex-end;
+}
+
+.entry-and-dropdown-group {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.entry-and-dropdown-group .question-entry-button {
+  min-width: 180px;
+  height: 42px;
+}
+
+.entry-and-dropdown-group .questions-entry {
+  flex: 1 1 160px;
+}
+
+#logout-button {
   display: block;
-  margin: 1.4em auto 0 auto;
-  padding: 0.5em 1.3em;
-  font-size: 1em;
-  border-radius: 8px;
-  background: linear-gradient(90deg, #1966c0 30%, #2176ff 100%);
+  margin-left: auto;
+  margin-top: 36px;
+  background: linear-gradient(90deg, #ee0979, #ff6a00);
   color: #fff;
-  border: none;
   font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 32px;
   cursor: pointer;
-  letter-spacing: 1px;
-  transition: background 0.2s, box-shadow 0.2s;
-  box-shadow: 0 2px 9px rgba(25,102,192,0.12);
-}
-#teacher-overlay .close-btn:hover {
-  background: linear-gradient(90deg, #135299 30%, #1966c0 100%);
-  box-shadow: 0 4px 16px rgba(25,102,192,0.16);
+  transition: background 0.3s;
 }
 
-/* === RESPONSIVE ADJUSTMENTS === */
-@media (max-width: 1200px) {
-  .main-host-page { max-width: 98vw; }
-  #teacher-overlay { width: 94vw; max-width: 99vw; font-size: 1em; }
-}
-@media (max-width: 900px) {
-  #teacher-overlay {
-    width: 98vw;
-    max-width: 99vw;
-    padding: 1em 0.3em 1em 0.3em;
-    font-size: 0.98em;
+@media (max-width: 800px) {
+  .register-fields-group, .register-buttons-group, .selects-and-send-group, .entry-and-dropdown-group {
+    flex-direction: column;
+    gap: 10px;
   }
-  #teacher-overlay h2 {
-    font-size: 1.2em;
+  #logout-button {
+    width: 100%;
+    margin: 32px 0 0 0;
   }
-  .main-host-page { padding: 10px 2px 10px 2px; font-size: 0.9em;}
 }
-
-/* === UTILITY: Hide/Show classes for overlays === */
-.hide { display: none !important; }
-.show { display: block !important; }
