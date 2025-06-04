@@ -63,9 +63,20 @@ document.getElementById('get-students-button').onclick = () => {
   ws.send(JSON.stringify({ type: 'getAllStudents' }));
 };
 
+// Show the type dropdown when "Show Questions for Selected Subject" is clicked
 document.getElementById('get-questions-button').onclick = () => {
-  const subject = document.getElementById('subject').value;
-  ws.send(JSON.stringify({ type: 'getQuestionsForSubject', subject }));
+  document.getElementById('question-type-selection').style.display = 'block';
+};
+
+// When the type is confirmed, send subject + type to server, then hide the dropdown again
+document.getElementById('confirm-type-button').onclick = () => {
+  const subject = document.getElementById('question-type').value;
+  ws.send(JSON.stringify({
+    type: 'getQuestionsForSubject',
+    subject,
+    questionType
+  }));
+  document.getElementById('question-type-selection').style.display = 'none';
 };
   let selectionMethod = document.querySelector('.js-question-entry-button');
   if (selectionMethod) {
