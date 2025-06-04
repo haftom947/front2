@@ -1,200 +1,294 @@
-/* General Styling */
+/* === GENERAL STYLING: Projector & PC Friendly === */
 body {
-  font-family: Arial, sans-serif;
-  font-size: 18px;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  font-size: 22px;
   margin: 0;
   padding: 0;
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  position: relative;
-  /* Animated gradient background */
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  justify-content: flex-start;
+  background: linear-gradient(135deg, #1e3c72, #2a5298 70%);
   background-size: 400% 400%;
-  animation: gradientAnimate 15s ease infinite;
+  animation: gradientAnimate 20s ease infinite;
 }
-
-
-
-/* Background Overlay */
+@keyframes gradientAnimate {
+  0% {background-position: 0% 50%;}
+  50% {background-position: 100% 50%;}
+  100% {background-position: 0% 50%;}
+}
 body::before {
   content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(1px);
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(255,255,255,0.06);
+  pointer-events: none;
   z-index: -1;
 }
 
-/* Main Host Page */
+/* === MAIN HOST PANEL === */
 .main-host-page {
   position: relative;
-  width: 90%;
-  max-width: 800px;
-  background-color: white;
-  border-radius: 15px;
-  padding: 25px;
-  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+  width: 96vw;
+  max-width: 950px;
+  background-color: #ffffffee;
+  border-radius: 18px;
+  padding: 32px 24px 22px 24px;
+  margin-top: 35px;
+  margin-bottom: 45px;
+  box-shadow: 0px 8px 36px rgba(0, 0, 0, 0.18);
+  border: 2.5px solid #1966c0;
 }
 
-/* Input Fields */
-.register-area input {
-  display: block;
-  width: 100%;
-  max-width: 400px;
-  height: 30px;
-  padding: 10px;
-  margin: 8px 0;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  outline: none;
-  transition: 0.3s;
-}
-
-.register-area input:focus {
-  border-color: #007bff;
-  box-shadow: 0px 0px 8px rgba(0, 123, 255, 0.5);
-}
-
-/* Title */
+/* === TITLE === */
 .host-title {
   text-align: center;
-  color: rgb(0, 110, 255);
-  font-size: 24px;
+  color: #1966c0;
+  font-size: 2.5em;
   font-weight: bold;
+  letter-spacing: 1.5px;
+  margin-bottom: 18px;
 }
 
-/* Selection Area */
-.selection-all {
-  border: 2px solid sandybrown;
-  box-shadow: inset 60px 60px 20px rgba(0, 110, 255, 0.1),
-              inset -60px -60px 20px rgba(0, 110, 255, 0.1);
-  margin: 20px auto;
+/* === REGISTER/REMOVE/SHOW BUTTON AREA === */
+.register-area {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2em;
+  align-items: center;
+  margin-bottom: 1.5em;
+}
+.register-area input {
+  width: 220px;
+  max-width: 97vw;
+  height: 32px;
   padding: 10px;
-  width: 90%;
-  max-width: 600px;
-  border-radius: 10px;
-  margin-bottom: 100px;
+  margin: 0.3em 0;
+  border: 1.5px solid #bdd7ee;
+  border-radius: 7px;
+  font-size: 1em;
+  background: #f8fbff;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+.register-area input:focus {
+  border-color: #2176ff;
+  box-shadow: 0 0 10px #2176ff22;
 }
 
-.selection-all select {
-  width: 120px;
-  height: 30px;
-  border-radius: 5px;
-  border: 1px solid #007bff;
-  padding: 5px;
-}
-
-.selection-all label {
-  margin-right: 10px;
-  font-weight: bold;
-}
-
-/* Question Entry */
-.questions-entry {
-  display: none;
-}
-
-.makeit-visible {
-  display: initial;
-  position: absolute;
-  bottom: 60px;
-  left: 30%;
-  padding: 8px;
-  font-size: 14px;
-}
-
-/* Buttons */
-button {
-  cursor: pointer;
+/* === ACTION BUTTONS (Register, Remove, etc.) === */
+button,
+.teacher-action,
+.teacher-action-btn {
+  display: inline-block;
+  margin: 0.5em 0.7em 0.5em 0;
+  padding: 0.7em 2.2em;
+  font-size: 1.25em;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(90deg, #2176ff 50%, #19bfff 100%);
+  color: #fff;
   border: none;
-  transition: 0.3s ease-in-out;
-  padding: 10px 16px;
-  font-size: 16px;
-  font-weight: bold;
-  border-radius: 8px;
-  width: 100%;
-  max-width: 200px;
-  text-align: center;
+  border-radius: 12px;
+  font-weight: 700;
+  box-shadow: 0 3px 16px rgba(33,118,255,0.10);
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
 }
-
-/* Register Button */
+button:hover,
+.teacher-action:hover,
+.teacher-action-btn:hover {
+  background: linear-gradient(90deg, #135299 30%, #1966c0 100%);
+  box-shadow: 0 4px 20px rgba(25,102,192,0.13);
+  transform: scale(1.04);
+}
 .register-button {
-  background: linear-gradient(to right, #007bff, #539be8);
-  color: white;
-  box-shadow: 0px 4px 10px rgba(0, 123, 255, 0.2);
-  transition: transform 0.5s;
+  background: linear-gradient(90deg, #007bff 60%, #539be8 100%);
 }
-
 .register-button:hover {
-  background: linear-gradient(to right, #0096b3, #497ec9);
-  transform: scale(1.05);
+  background: linear-gradient(90deg, #0096b3 60%, #497ec9 100%);
 }
-
-/* Remove Button */
 .remove-button {
-  background: linear-gradient(to right, #ff4b5c, #ff7f7f);
-  color: white;
-  box-shadow: 0px 4px 10px rgba(255, 75, 92, 0.2);
+  background: linear-gradient(90deg, #ff4b5c 60%, #ff7f7f 100%);
 }
-
 .remove-button:hover {
-  background: linear-gradient(to right, #d62f50, #e49565);
-  transform: scale(1.0);
+  background: linear-gradient(90deg, #d62f50 60%, #e49565 100%);
 }
-
-/* Send Button */
 .send-button {
-  background: linear-gradient(to right, #ff6347, #ff8566);
-  color: white;
-  box-shadow: 0px 4px 10px rgba(255, 99, 71, 0.2);
+  background: linear-gradient(90deg, #ff6347 60%, #ff8566 100%);
 }
-
 .send-button:hover {
-  background: linear-gradient(to right, #e24c36, #ff6450);
-  transform: scale(1.05);
+  background: linear-gradient(90deg, #e24c36 60%, #ff6450 100%);
 }
-
 .question-entry-button {
-  background: linear-gradient(to right, #ffcc00, #ff9900);
+  background: linear-gradient(90deg, #ffcc00 60%, #ff9900 100%);
   color: white;
-  font-size: 16px; /* Reduced size */
-  font-weight: bold;
-  padding: 10px 16px;
-  border-radius: 10px;
   border: 2px solid #ff9900;
-  width: 90%;
-  max-width: 220px;
-  text-align: center;
-  box-shadow: 0px 3px 10px rgba(255, 153, 0, 0.3);
-  transition: 0.3s ease-in-out;
-  /* Positioned separately */
+  box-shadow: 0px 3px 10px rgba(255, 153, 0, 0.25);
   position: absolute;
   margin-top: 25px;
   margin-left: 15px;
   bottom: 65px;
   left: 0;
+  width: 210px;
+  max-width: 93vw;
 }
-
-/* Hover Effect */
 .question-entry-button:hover {
-  background: linear-gradient(to right, #ff5500, #ff6600);
-  transform: scale(1.10);
-  box-shadow: 0px 3px 15px rgba(255, 153, 0, 0.5);
+  background: linear-gradient(90deg, #ff5500 60%, #ff6600 100%);
+  transform: scale(1.08);
+  box-shadow: 0px 3px 15px rgba(255, 153, 0, 0.34);
 }
 
-@media screen and (max-width: 800px) {
-  .makeit-visible {
-      display: initial;
-      position: absolute;
-      bottom: 20px;
-      left: 10%;
-      padding: 8px;
-      font-size: 14px;
-    }
+/* === SELECTION AREA === */
+.selection-all {
+  border: 2.5px solid #e6c49f;
+  box-shadow: inset 60px 60px 20px rgba(0,110,255,0.06),
+              inset -60px -60px 20px rgba(0,110,255,0.06);
+  margin: 20px auto;
+  padding: 12px 14px 14px 14px;
+  width: 94%;
+  max-width: 650px;
+  border-radius: 10px;
+  background: #fcfcfd;
 }
+.selection-all select {
+  width: 140px;
+  height: 36px;
+  border-radius: 5px;
+  border: 1.5px solid #007bff;
+  padding: 6px 8px;
+  font-size: 1.04em;
+}
+.selection-all label {
+  margin-right: 14px;
+  font-weight: 600;
+  color: #1966c0;
+}
+
+/* === OVERLAY: Projector & PC Friendly === */
+#teacher-overlay {
+  position: fixed;
+  top: 3vh;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.32);
+  width: 62vw;
+  min-width: 330px;
+  max-width: 960px;
+  padding: 2.8em 2.1em 2.3em 2.1em;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  color: #1e2a36;
+  font-size: 2.17em;
+  animation: overlayDropIn 0.5s;
+  border: 4px solid #1966c0;
+}
+@keyframes overlayDropIn {
+  from { opacity: 0; transform: translate(-50%, -30px);}
+  to   { opacity: 1; transform: translate(-50%, 0);}
+}
+#teacher-overlay h2 {
+  font-size: 2.8em;
+  color: #1966c0;
+  text-align: center;
+  margin-bottom: 0.5em;
+  letter-spacing: 2px;
+}
+#teacher-overlay .student-label {
+  display: block;
+  font-size: 1.2em;
+  color: #0a3557;
+  margin-bottom: 0.4em;
+  font-weight: 600;
+  text-align: center;
+}
+#teacher-overlay .question-box {
+  font-size: 1.35em;
+  margin: 1em 0 1.8em 0;
+  color: #222;
+  text-align: center;
+  font-weight: bold;
+}
+#teacher-overlay .choices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7em;
+  margin-bottom: 1.5em;
+}
+#teacher-overlay .choice-label {
+  padding: 0.6em 1.2em;
+  background: #f4f8fd;
+  border-radius: 10px;
+  border: 2px solid #bdd7ee;
+  font-size: 1.15em;
+  color: #114266;
+  cursor: default;
+  box-shadow: 0 1px 5px rgba(25,102,192,0.08);
+}
+#teacher-overlay .answer-row {
+  font-size: 1.18em;
+  margin-bottom: 0.6em;
+  text-align: center;
+}
+#teacher-overlay .feedback {
+  font-size: 1.6em;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  padding: 0.4em 0.9em;
+  border-radius: 12px;
+  display: inline-block;
+}
+#teacher-overlay .feedback.correct {
+  color: #2e7d32;
+  background: #d1f5d3;
+  border: 2px solid #5ea96c;
+}
+#teacher-overlay .feedback.incorrect {
+  color: #b71c1c;
+  background: #ffd2d2;
+  border: 2px solid #e57373;
+}
+#teacher-overlay .close-btn {
+  display: block;
+  margin: 2em auto 0 auto;
+  padding: 0.7em 2.5em;
+  font-size: 1.25em;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #1966c0 30%, #2176ff 100%);
+  color: #fff;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 12px rgba(25,102,192,0.12);
+}
+#teacher-overlay .close-btn:hover {
+  background: linear-gradient(90deg, #135299 30%, #1966c0 100%);
+  box-shadow: 0 4px 20px rgba(25,102,192,0.18);
+}
+
+@media (max-width: 1200px) {
+  .main-host-page { max-width: 98vw; }
+  #teacher-overlay { width: 94vw; max-width: 99vw; font-size: 1.18em; }
+}
+@media (max-width: 900px) {
+  #teacher-overlay {
+    width: 98vw;
+    padding: 1.2em 0.5em 1.5em 0.5em;
+    font-size: 1.07em;
+  }
+  #teacher-overlay h2 {
+    font-size: 1.5em;
+  }
+  .main-host-page { padding: 10px 2px 10px 2px; font-size: 0.9em;}
+}
+
+/* === UTILITY: Hide/Show classes for overlays === */
+.hide { display: none !important; }
+.show { display: block !important; }
