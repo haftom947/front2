@@ -8,9 +8,29 @@ ws.onopen = () => {
 ws.onmessage = (event) => {
   const data = JSON.parse(event.data);
   console.log('Message from server:', data);
+  if (data.type === 'sentQuestionToTeacher') {
+    showTeacherOverlay({
+      studentId: data.studentId,
+      question: data.question,
+      choiceA: data.choiceA,
+      choiceB: data.choiceB,
+      choiceC: data.choiceC,
+      choiceD: data.choiceD
+    });
+  }
+
   if (data.type === 'studentAnswered') {
-  showTeacherOverlay(data); // displays student answer and feedback
-}
+    showTeacherOverlay({
+      studentId: data.studentId,
+      question: data.question,
+      choiceA: data.choiceA,
+      choiceB: data.choiceB,
+      choiceC: data.choiceC,
+      choiceD: data.choiceD,
+      answer: data.answer,
+      feedback: data.feedback
+    });
+  }
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -117,31 +137,39 @@ document.querySelector('.student-password').value = '';
     }
   }
 });
-function showTeacherOverlay({ studentId, question, answer, feedback }) {
+function showTeacherOverlay({ studentId, question, choiceA, choiceB, choiceC, choiceD, answer, feedback }) {
   let overlay = document.getElementById('teacher-overlay');
   if (!overlay) {
     overlay = document.createElement('div');
     overlay.id = 'teacher-overlay';
+    overlay.className = 'card';
     overlay.style.position = 'fixed';
-    overlay.style.top = '10px';
-    overlay.style.right = '10px';
-    overlay.style.background = 'rgba(0,0,0,0.9)';
-    overlay.style.color = '#fff';
-    overlay.style.padding = '20px';
-    overlay.style.borderRadius = '8px';
+    overlay.style.top = '10%';
+    overlay.style.left = '50%';
+    overlay.style.transform = 'translateX(-50%)';
     overlay.style.zIndex = 1000;
-    overlay.style.maxWidth = '380px';
-    overlay.style.fontSize = '1rem';
-    overlay.style.boxShadow = '0 2px 10px rgba(0,0,0,0.5)';
+    overlay.style.maxWidth = '700px';
+    overlay.style.width = '90%';
     document.body.appendChild(overlay);
   }
-  let html = `<b>Student:</b> ${studentId}<br><b>Question:</b> ${question}`;
-  if (answer) {
-    html += `<br><b>Answer:</b> ${answer}`;
-  }
-  if (feedback) {
-    html += `<br><b>Feedback:</b> <span style="color:${feedback === 'Correct!' ? 'lightgreen' : 'red'}">${feedback}</span>`;
-  }
-  overlay.innerHTML = html;
+  overlay.innerHTML = `
+    <h2>KSHS Academic Competition - Question</h2>
+    <div>
+      <b>Student:</b> ${studentId || ''}<br>
+      <div style="margin: 12px 0; font-weight: bold;">${question || 'Waiting for the question...'}</div>
+      <form style="pointer-events: none; opacity:0.7;">
+        <label><input type="radio" name="answer" value="A" disabled> <span>${choiceA || ""}</span></label><br>
+        <label><input type="radio" name="answer" value="B" disabled> <span>${choiceB || ""}</span></label><br>
+        <label><input type="radio" name="answer" value="C" disabled> <span>${choiceC || ""}</span></label><br>
+        <label><input type="radio" name="answer" value="D" disabled> <span>${choiceD || ""}</span></label><br>
+      </form>
+      ${answer ? `<b>Answer:</b> ${answer}<br>` : ''}
+      ${feedback ? `<div class="feedback" style="color:${feedback === 'Correct!' ? 'green' : 'red'};">${feedback}</div>` : ''}
+      <button class="close-btn" id="teacher-overlay-close">Close</button>
+    </div>
+  `;
   overlay.style.display = 'block';
+  document.getElementById('teacher-overlay-close').onclick = () => {
+    overlay.style.display = 'none';
+  };
 }
