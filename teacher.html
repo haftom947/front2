@@ -12,6 +12,13 @@
     }
   </script>
   <style>
+    .button-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8em;
+  margin-top: 0.6em;
+  align-items: stretch;
+}
   /* Projector-friendly Overlay Style - Desktop Optimized */
 #teacher-overlay {
   position: fixed;
@@ -138,10 +145,12 @@
       <input class="student-name" type="text" placeholder="Enter student Name" required />
       <input class="student-id" type="text" placeholder="Enter Student ID" required />
       <input class="student-password" type="password" placeholder="Set student's Entry code" required />
-      <button class="register-button js-register-button">Register</button>
-      <button class="remove-button js-remove-button">Remove</button>
-      <button id="get-students-button" class="teacher-action">Show All Students</button>
-<button id="get-questions-button" class="teacher-action">Show Questions for Selected Subject</button>
+      <div class="button-column">
+  <button class="register-button js-register-button">Register</button>
+  <button class="remove-button js-remove-button">Remove</button>
+  <button id="get-students-button" class="teacher-action">Show All Students</button>
+  <button id="get-questions-button" class="teacher-action">Show Questions for Selected Subject</button>
+</div>
       <div id="question-type-selection" style="display:none; margin-top:1em;">
   <label for="question-type">Choose Question Type:</label>
   <select id="question-type">
