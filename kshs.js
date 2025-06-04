@@ -142,33 +142,32 @@ function showTeacherOverlay({ studentId, question, choiceA, choiceB, choiceC, ch
   if (!overlay) {
     overlay = document.createElement('div');
     overlay.id = 'teacher-overlay';
-    overlay.className = 'card';
-    overlay.style.position = 'fixed';
-    overlay.style.top = '10%';
-    overlay.style.left = '50%';
-    overlay.style.transform = 'translateX(-50%)';
-    overlay.style.zIndex = 1000;
-    overlay.style.maxWidth = '700px';
-    overlay.style.width = '90%';
     document.body.appendChild(overlay);
   }
+
+  // Feedback class for color
+  let feedbackHtml = "";
+  if (feedback) {
+    const isCorrect = feedback.trim().toLowerCase().startsWith('correct');
+    feedbackHtml = `<div class="feedback ${isCorrect ? 'correct' : 'incorrect'}">${feedback}</div>`;
+  }
+
   overlay.innerHTML = `
-    <h2>KSHS Academic Competition - Question</h2>
-    <div>
-      <b>Student:</b> ${studentId || ''}<br>
-      <div style="margin: 12px 0; font-weight: bold;">${question || 'Waiting for the question...'}</div>
-      <form style="pointer-events: none; opacity:0.7;">
-        <label><input type="radio" name="answer" value="A" disabled> <span>${choiceA || ""}</span></label><br>
-        <label><input type="radio" name="answer" value="B" disabled> <span>${choiceB || ""}</span></label><br>
-        <label><input type="radio" name="answer" value="C" disabled> <span>${choiceC || ""}</span></label><br>
-        <label><input type="radio" name="answer" value="D" disabled> <span>${choiceD || ""}</span></label><br>
-      </form>
-      ${answer ? `<b>Answer:</b> ${answer}<br>` : ''}
-      ${feedback ? `<div class="feedback" style="color:${feedback === 'Correct!' ? 'green' : 'red'};">${feedback}</div>` : ''}
-      <button class="close-btn" id="teacher-overlay-close">Close</button>
+    <h2>KSHS Academic Competition</h2>
+    <span class="student-label"><b>Student:</b> ${studentId || ''}</span>
+    <div class="question-box">${question || 'Waiting for the question...'}</div>
+    <div class="choices">
+      <div class="choice-label"><b>A.</b> ${choiceA || ""}</div>
+      <div class="choice-label"><b>B.</b> ${choiceB || ""}</div>
+      <div class="choice-label"><b>C.</b> ${choiceC || ""}</div>
+      <div class="choice-label"><b>D.</b> ${choiceD || ""}</div>
     </div>
+    ${answer ? `<div class="answer-row"><b>Submitted Answer:</b> ${answer}</div>` : ''}
+    ${feedbackHtml}
+    <button class="close-btn" id="teacher-overlay-close">Close</button>
   `;
   overlay.style.display = 'block';
+
   document.getElementById('teacher-overlay-close').onclick = () => {
     overlay.style.display = 'none';
   };
