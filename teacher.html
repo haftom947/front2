@@ -11,6 +11,124 @@
       window.location.href = 'teacher-login.html';
     }
   </script>
+  <style>
+/* Projector-friendly Overlay Style */
+#teacher-overlay {
+  position: fixed;
+  top: 3vh;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+  width: 60vw;
+  min-width: 330px;
+  max-width: 900px;
+  padding: 2.5em 2em 2em 2em;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  color: #1e2a36;
+  font-size: 2.2em;
+  animation: overlayDropIn 0.5s;
+  border: 4px solid #1966c0;
+}
+@keyframes overlayDropIn {
+  from { opacity: 0; transform: translate(-50%, -30px);}
+  to   { opacity: 1; transform: translate(-50%, 0);}
+}
+#teacher-overlay h2 {
+  font-size: 2.8em;
+  color: #1966c0;
+  text-align: center;
+  margin-bottom: 0.5em;
+  letter-spacing: 2px;
+}
+#teacher-overlay .student-label {
+  display: block;
+  font-size: 1.2em;
+  color: #0a3557;
+  margin-bottom: 0.4em;
+  font-weight: 600;
+  text-align: center;
+}
+#teacher-overlay .question-box {
+  font-size: 1.35em;
+  margin: 1em 0 1.8em 0;
+  color: #222;
+  text-align: center;
+  font-weight: bold;
+}
+#teacher-overlay .choices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7em;
+  margin-bottom: 1.5em;
+}
+#teacher-overlay .choice-label {
+  padding: 0.6em 1.2em;
+  background: #f4f8fd;
+  border-radius: 10px;
+  border: 2px solid #bdd7ee;
+  font-size: 1.15em;
+  color: #114266;
+  cursor: default;
+  box-shadow: 0 1px 5px rgba(25,102,192,0.08);
+}
+#teacher-overlay .answer-row {
+  font-size: 1.18em;
+  margin-bottom: 0.6em;
+  text-align: center;
+}
+#teacher-overlay .feedback {
+  font-size: 1.6em;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  padding: 0.4em 0.9em;
+  border-radius: 12px;
+  display: inline-block;
+}
+#teacher-overlay .feedback.correct {
+  color: #2e7d32;
+  background: #d1f5d3;
+  border: 2px solid #5ea96c;
+}
+#teacher-overlay .feedback.incorrect {
+  color: #b71c1c;
+  background: #ffd2d2;
+  border: 2px solid #e57373;
+}
+#teacher-overlay .close-btn {
+  display: block;
+  margin: 2em auto 0 auto;
+  padding: 0.7em 2.5em;
+  font-size: 1.25em;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #1966c0 30%, #2176ff 100%);
+  color: #fff;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 12px rgba(25,102,192,0.12);
+}
+#teacher-overlay .close-btn:hover {
+  background: linear-gradient(90deg, #135299 30%, #1966c0 100%);
+  box-shadow: 0 4px 20px rgba(25,102,192,0.18);
+}
+@media (max-width: 900px) {
+  #teacher-overlay {
+    width: 95vw;
+    padding: 1.2em 0.5em 1.5em 0.5em;
+    font-size: 1.3em;
+  }
+  #teacher-overlay h2 {
+    font-size: 1.7em;
+  }
+}
+</style>
 </head>
 <body>
   <div class="main-host-page">
