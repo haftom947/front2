@@ -19,6 +19,31 @@ ws.onmessage = (event) => {
     });
   }
 
+  if (data.type === 'allStudents') {
+  let html = `<h2>Registered Students</h2><ul>`;
+  data.students.forEach(s => {
+    html += `<li><b>${s.id}</b>: ${s.name}</li>`;
+  });
+  html += '</ul>';
+  showCustomOverlay(html);
+}
+
+if (data.type === 'questionsForSubject') {
+  let html = `<h2>Questions for ${data.subject}</h2><ol>`;
+  data.questions.forEach((q, idx) => {
+    html += `<li>
+      <b>Q${idx+1}:</b> ${q.question}<br>
+      <span style="color:#1966c0">A.</span> ${q.choiceA || ""}<br>
+      <span style="color:#1966c0">B.</span> ${q.choiceB || ""}<br>
+      <span style="color:#1966c0">C.</span> ${q.choiceC || ""}<br>
+      <span style="color:#1966c0">D.</span> ${q.choiceD || ""}<br>
+      <span style="color:green"><b>Correct:</b> ${q.correct ? q.correct : "?"}</span>
+    </li><br>`;
+  });
+  html += '</ol>';
+  showCustomOverlay(html);
+}
+
   if (data.type === 'studentAnswered') {
     showTeacherOverlay({
       studentId: data.studentId,
@@ -34,7 +59,14 @@ ws.onmessage = (event) => {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+document.getElementById('get-students-button').onclick = () => {
+  ws.send(JSON.stringify({ type: 'getAllStudents' }));
+};
 
+document.getElementById('get-questions-button').onclick = () => {
+  const subject = document.getElementById('subject').value;
+  ws.send(JSON.stringify({ type: 'getQuestionsForSubject', subject }));
+};
   let selectionMethod = document.querySelector('.js-question-entry-button');
   if (selectionMethod) {
     selectionMethod.addEventListener('click', () => {
@@ -168,6 +200,30 @@ function showTeacherOverlay({ studentId, question, choiceA, choiceB, choiceC, ch
   `;
   overlay.style.display = 'block';
 
+  document.getElementById('teacher-overlay-close').onclick = () => {
+    overlay.style.display = 'none';
+  };
+}
+function showCustomOverlay(html) {
+  let overlay = document.getElementById('teacher-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'teacher-overlay';
+    overlay.className = 'card';
+    overlay.style.position = 'fixed';
+    overlay.style.top = '10%';
+    overlay.style.left = '50%';
+    overlay.style.transform = 'translateX(-50%)';
+    overlay.style.zIndex = 1000;
+    overlay.style.maxWidth = '700px';
+    overlay.style.width = '90%';
+    document.body.appendChild(overlay);
+  }
+  overlay.innerHTML = `
+    ${html}
+    <button class="close-btn" id="teacher-overlay-close">Close</button>
+  `;
+  overlay.style.display = 'block';
   document.getElementById('teacher-overlay-close').onclick = () => {
     overlay.style.display = 'none';
   };
