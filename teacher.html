@@ -16,14 +16,16 @@
   <div class="main-host-page">
     <h1 class="host-title">Host Control Page</h1>
     <div class="register-area">
-      <!-- Group 1: Input Fields -->
-      <div class="register-fields-group">
+
+      <!-- Group 1: Student Input fields -->
+      <div class="group-fields">
         <input class="student-name" type="text" placeholder="Enter student Name" required />
         <input class="student-id" type="text" placeholder="Enter Student ID" required />
         <input class="student-password" type="password" placeholder="Set student's Entry code" required />
       </div>
+
       <!-- Group 2: Four Main Buttons -->
-      <div class="register-buttons-group">
+      <div class="group-main-buttons">
         <button class="register-button js-register-button">Register</button>
         <button class="remove-button js-remove-button">Remove</button>
         <button id="get-students-button" class="teacher-action">Show All Students</button>
@@ -32,8 +34,8 @@
     </div>
 
     <div class="selection-all">
-      <!-- Group 3: The three selects and Send Question button -->
-      <div class="selects-and-send-group">
+      <!-- Group 3: Three selects + send button -->
+      <div class="group-selects-send">
         <div class="student-selection">
           <label for="student-id">Select a Student</label>
           <select name="Student" id="student-id">
@@ -78,8 +80,8 @@
         <button class="send-button">Send Question</button>
       </div>
 
-      <!-- Group 4: Enter Question button and select subject -->
-      <div class="entry-and-dropdown-group">
+      <!-- Group 4: Enter Question + subject select -->
+      <div class="group-entry-question">
         <button class="question-entry-button js-question-entry-button">Enter Your Question</button>
         <div class="questions-entry js-question-entry">
           <label for="subject-question">Select a Subject</label>
@@ -100,14 +102,13 @@
       <div class="question-web js-question-web"></div>
     </div>
 
-    <!-- Group 5: Logout button alone -->
+    <!-- Group 5: Logout button -->
     <button id="logout-button">Logout</button>
   </div>
 
   <script src="DayJS/dayjs.min.js"></script>
   <script type="module" src="kshs.js"></script>
 
-  <!-- ✅ Logout Handler Script -->
   <script>
     document.getElementById('logout-button').addEventListener('click', () => {
       localStorage.removeItem('isTeacherAuthenticated');
