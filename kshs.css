@@ -169,7 +169,7 @@ button:hover,
   color: #1966c0;
 }
 
-/* === OVERLAY: Projector & PC Friendly === */
+/* === OVERLAY: Projector & PC Friendly, Fully Scrollable === */
 #teacher-overlay {
   position: fixed;
   top: 3vh;
@@ -190,6 +190,7 @@ button:hover,
   border: 3px solid #1966c0;
   overflow-y: auto;
   max-height: 88vh;
+  overscroll-behavior: contain;
 }
 @keyframes overlayDropIn {
   from { opacity: 0; transform: translate(-50%, -30px);}
