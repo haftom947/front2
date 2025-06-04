@@ -31,6 +31,8 @@
   font-size: 1.1em;
   border: 3px solid #1966c0;
   animation: overlayDropIn 0.4s;
+  max-height: 80vh;   /* Set a maximum height relative to the viewport */
+  overflow-y: auto;
 }
 @keyframes overlayDropIn {
   from { opacity: 0; transform: translate(-50%, -20px);}
