@@ -73,8 +73,7 @@ document.getElementById('confirm-type-button').onclick = () => {
   const subject = document.getElementById('question-type').value;
   ws.send(JSON.stringify({
     type: 'getQuestionsForSubject',
-    subject,
-    questionType
+    subject
   }));
   document.getElementById('question-type-selection').style.display = 'none';
 };
