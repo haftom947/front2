@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Student Login</title>
   <style>
-    /* Same as before (keep your existing styles) */
     body {
       font-family: 'Segoe UI', sans-serif;
       background: linear-gradient(135deg, #1e3c72, #2a5298);
@@ -23,7 +22,6 @@
       width: 100%;
       box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
       animation: dropIn 0.6s ease-out;
-    
     }
     @keyframes dropIn {
       from { transform: translateY(-30px); opacity: 0; }
@@ -56,7 +54,6 @@
       width: 100%;
       padding: 8px 2px;
       margin-bottom: 2px;
-    
     }
     .log-in-button{
       background: linear-gradient(to right, aqua, blue);
@@ -65,7 +62,6 @@
       margin-bottom: 0;
       margin-left: 15%;
     }
-
   </style>
 </head>
 <body>
@@ -81,7 +77,8 @@
 
   <!-- Question Box (Initially Hidden) -->
   <div id="question-box" class="card" style="display:none;">
-    <h2>KSHS Academic Competitution - Question</h2>
+    <h2>KSHS Academic Competition - Question</h2>
+    <div id="timer-box" style="display:none; margin-bottom: 10px; font-size: 1.1em; color: #1966c0;"></div>
     <div id="question-box-inner">
       <p id="question-text">Please wait till you get your question...</p>
       <form id="answerForm">
@@ -95,9 +92,7 @@
     </div>
   </div>
 
-  <!-- Script -->
   <script>
-    // Redirect if already logged in
     if (localStorage.getItem('isStudentAuthenticated') === 'true') {
       document.getElementById('login-form').style.display = 'none';
       document.getElementById('question-box').style.display = 'block';
@@ -105,7 +100,6 @@
 
     const ws = new WebSocket('wss://kshs-quiz1.onrender.com');
 
-    // Handle login button
     document.querySelector('.js-log-in-button').addEventListener('click', () => {
       const studentName = document.querySelector('.student-name1').value.trim();
       const studentId = document.querySelector('.student-id1').value.trim();
@@ -123,7 +117,9 @@
       ws.send(JSON.stringify(loginData));
     });
 
-    // Handle WebSocket messages
+    let timerInterval = null;
+    let remainingTime = 0;
+
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
@@ -136,29 +132,44 @@
         document.getElementById('error-message').style.display = 'block';
       }
 
-// Function to clear all radio button selections
-function clearRadioSelections() {
-  document.querySelectorAll('input[name="answer"]').forEach(input => {
-    input.checked = false;
-  });
-}
+      function clearRadioSelections() {
+        document.querySelectorAll('input[name="answer"]').forEach(input => {
+          input.checked = false;
+        });
+      }
+      function clearFeedback() {
+        document.getElementById('feedback').textContent = '';
+        document.getElementById('feedback').style.color = '';
+      }
 
-// Function to clear feedback
-function clearFeedback() {
-  document.getElementById('feedback').textContent = '';
-  document.getElementById('feedback').style.color = '';
-}
       if (data.type === 'question') {
         const currentQuestion = data.question;
-        if (data.type === 'question') {
-  const currentQuestion = data.question;
-  
-  // Clear previous selections and feedback FIRST
-  clearRadioSelections();
-  clearFeedback();
-        }
-  // Then update the question content
-  document.getElementById('question-text').textContent = currentQuestion.question;
+
+        // Timer logic
+        if (timerInterval) clearInterval(timerInterval);
+        remainingTime = data.countdown || 180;
+        document.getElementById('timer-box').style.display = 'block';
+        updateTimerDisplay();
+        timerInterval = setInterval(() => {
+          remainingTime--;
+          updateTimerDisplay();
+          if (remainingTime <= 0) {
+            clearInterval(timerInterval);
+            document.getElementById('answerForm').style.display = 'none';
+            document.getElementById('feedback').textContent = 'Time is up! Marked as incorrect.';
+            document.getElementById('feedback').style.color = 'red';
+            ws.send(JSON.stringify({
+              type: 'submitAnswer',
+              studentId: localStorage.getItem('currentStudentId'),
+              answer: null // timeout
+            }));
+          }
+        }, 1000);
+
+        clearRadioSelections();
+        clearFeedback();
+
+        document.getElementById('question-text').textContent = currentQuestion.question;
         document.getElementById('optA').textContent = currentQuestion.choiceA;
         document.getElementById('optB').textContent = currentQuestion.choiceB;
         document.getElementById('optC').textContent = currentQuestion.choiceC;
@@ -167,9 +178,28 @@ function clearFeedback() {
         document.getElementById('answerForm').style.display = 'block';
         document.getElementById('feedback').textContent = '';
       }
+
+      if (data.type === 'submitAnswer') {
+        if (timerInterval) clearInterval(timerInterval);
+        document.getElementById('timer-box').style.display = 'none';
+        document.getElementById('timer-box').textContent = '';
+        if (data.feedback === 'Correct!') {
+          document.getElementById('feedback').textContent = 'Correct!';
+          document.getElementById('feedback').style.color = 'green';
+        } else {
+          document.getElementById('feedback').textContent = 'Incorrect!';
+          document.getElementById('feedback').style.color = 'red';
+        }
+      }
     };
 
-    // Handle answer submission
+    function updateTimerDisplay() {
+      const min = Math.floor(remainingTime / 60);
+      const sec = remainingTime % 60;
+      document.getElementById('timer-box').textContent =
+        `Time left: ${min}:${sec.toString().padStart(2, '0')}`;
+    }
+
     document.getElementById('answerForm').addEventListener('submit', function (event) {
       event.preventDefault();
       const selected = document.querySelector('input[name="answer"]:checked');
@@ -177,6 +207,10 @@ function clearFeedback() {
         alert('Please select an answer.');
         return;
       }
+
+      if (timerInterval) clearInterval(timerInterval);
+      document.getElementById('timer-box').textContent = '';
+      document.getElementById('timer-box').style.display = 'none';
 
       const answerData = {
         type: 'submitAnswer',
@@ -186,13 +220,7 @@ function clearFeedback() {
 
       ws.send(JSON.stringify(answerData));
 
-      if (selected.value === window.currentCorrectAnswer) {
-        document.getElementById('feedback').textContent = 'Correct!';
-        document.getElementById('feedback').style.color = 'green';
-      } else {
-        document.getElementById('feedback').textContent = 'Incorrect!';
-        document.getElementById('feedback').style.color = 'red';
-      }
+      // Feedback will be set by submitAnswer message
     });
   </script>
 </body>
