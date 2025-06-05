@@ -13,131 +13,15 @@
   </script>
   <style>
     .button-column {
-  display: flex;
-  flex-direction: row;
-  gap: 0.8em;
+      display: flex;
+      flex-direction: row;
+      gap: 0.8em;
       flex: 1 1;
-  margin-top: 0.6em;
-  align-items: stretch;
-}
-  /* Projector-friendly Overlay Style - Desktop Optimized */
-#teacher-overlay {
-  position: fixed;
-  top: 5vh;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 9999;
-  background: #fff;
-  border-radius: 14px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
-  width: 38vw;
-  min-width: 300px;
-  max-width: 540px;
-  padding: 1.2em 1.1em 1.2em 1.1em;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  color: #1e2a36;
-  font-size: 1.1em;
-  border: 3px solid #1966c0;
-  animation: overlayDropIn 0.4s;
-  max-height: 80vh;   /* Set a maximum height relative to the viewport */
-  overflow-y: auto;
-}
-@keyframes overlayDropIn {
-  from { opacity: 0; transform: translate(-50%, -20px);}
-  to   { opacity: 1; transform: translate(-50%, 0);}
-}
-#teacher-overlay h2 {
-  font-size: 1.4em;
-  color: #1966c0;
-  text-align: center;
-  margin-bottom: 0.3em;
-  letter-spacing: 1px;
-}
-#teacher-overlay .student-label {
-  display: block;
-  font-size: 1em;
-  color: #0a3557;
-  margin-bottom: 0.2em;
-  font-weight: 600;
-  text-align: center;
-}
-#teacher-overlay .question-box {
-  font-size: 1em;
-  margin: 0.6em 0 1.2em 0;
-  color: #222;
-  text-align: center;
-  font-weight: bold;
-}
-#teacher-overlay .choices {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4em;
-  margin-bottom: 1em;
-}
-#teacher-overlay .choice-label {
-  padding: 0.4em 0.8em;
-  background: #f4f8fd;
-  border-radius: 7px;
-  border: 1.5px solid #bdd7ee;
-  font-size: 0.98em;
-  color: #114266;
-  cursor: default;
-  box-shadow: 0 1px 3px rgba(25,102,192,0.07);
-}
-#teacher-overlay .answer-row {
-  font-size: 1em;
-  margin-bottom: 0.3em;
-  text-align: center;
-}
-#teacher-overlay .feedback {
-  font-size: 1.15em;
-  font-weight: bold;
-  text-align: center;
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
-  padding: 0.25em 0.6em;
-  border-radius: 8px;
-  display: inline-block;
-}
-#teacher-overlay .feedback.correct {
-  color: #2e7d32;
-  background: #d1f5d3;
-  border: 1.5px solid #5ea96c;
-}
-#teacher-overlay .feedback.incorrect {
-  color: #b71c1c;
-  background: #ffd2d2;
-  border: 1.5px solid #e57373;
-}
-#teacher-overlay .close-btn {
-  display: block;
-  margin: 1em auto 0 auto;
-  padding: 0.5em 1.7em;
-  font-size: 1em;
-  border-radius: 8px;
-  background: linear-gradient(90deg, #1966c0 30%, #2176ff 100%);
-  color: #fff;
-  border: none;
-  font-weight: bold;
-  cursor: pointer;
-  letter-spacing: 0.5px;
-  transition: background 0.2s, box-shadow 0.2s;
-  box-shadow: 0 2px 8px rgba(25,102,192,0.10);
-}
-#teacher-overlay .close-btn:hover {
-  background: linear-gradient(90deg, #135299 30%, #1966c0 100%);
-  box-shadow: 0 3px 14px rgba(25,102,192,0.15);
-}
-@media (max-width: 900px) {
-  #teacher-overlay {
-    width: 95vw;
-    padding: 0.8em 0.3em 1em 0.3em;
-    font-size: 1em;
-  }
-  #teacher-overlay h2 {
-    font-size: 1.1em;
-  }
-} </style>
+      margin-top: 0.6em;
+      align-items: stretch;
+    }
+    /* ... existing overlay styles ... */
+  </style>
 </head>
 <body>
   <div class="main-host-page">
@@ -147,26 +31,33 @@
       <input class="student-id" type="text" placeholder="Enter Student ID" required />
       <input class="student-password" type="password" placeholder="Set student's Entry code" required />
       <div class="button-column">
-  <button class="register-button js-register-button">Register</button>
-  <button class="remove-button js-remove-button">Remove</button>
-  <button id="get-students-button" class="teacher-action">Show All Students</button>
-  <button id="get-questions-button" class="teacher-action">Show Questions for Selected Subject</button>
-</div>
+        <button class="register-button js-register-button">Register</button>
+        <button class="remove-button js-remove-button">Remove</button>
+        <button id="get-students-button" class="teacher-action">Show All Students</button>
+        <button id="get-questions-button" class="teacher-action">Show Questions for Selected Subject</button>
+      </div>
       <div id="question-type-selection" style="display:none; margin-top:1em;">
-  <label for="question-type">Choose Question Type:</label>
-  <select id="question-type">
-  <option value="Nothing" selected disabled>Here</option>
-  <option value="Maths">Maths</option>
-  <option value="English">English</option>
-  <option value="Chemistry">Chemistry</option>
-  <option value="Biology">Biology</option>
-  <option value="Tigrigna">Tigrigna</option>
-  <option value="Economics">Economics</option>
-  <option value="Physics">Physics</option>
-  <option value="Geography">Geography</option>
-  </select>
-  <button id="confirm-type-button">Confirm Type</button>
-</div>
+        <label for="question-type">Choose Question Type:</label>
+        <select id="question-type">
+          <option value="Nothing" selected disabled>Here</option>
+          <option value="Maths">Maths</option>
+          <option value="English">English</option>
+          <option value="Chemistry">Chemistry</option>
+          <option value="Biology">Biology</option>
+          <option value="Tigrigna">Tigrigna</option>
+          <option value="Economics">Economics</option>
+          <option value="Physics">Physics</option>
+          <option value="Geography">Geography</option>
+        </select>
+        <button id="confirm-type-button">Confirm Type</button>
+      </div>
+    </div>
+
+    <!-- GLOBAL TIMER CONTROL -->
+    <div style="margin-bottom:12px;">
+      <label for="global-timer-input">Timer (seconds): </label>
+      <input type="number" id="global-timer-input" min="10" max="600" value="180" style="width:60px;">
+      <button id="set-timer-btn">Set Timer</button>
     </div>
 
     <div class="selection-all">
@@ -234,11 +125,10 @@
 
       <div class="question-web js-question-web"></div>
     </div>
-    <div style="margin-bottom:12px;">
-  <label for="global-timer-input">Timer (seconds): </label>
-  <input type="number" id="global-timer-input" min="10" max="600" value="180" style="width:60px;">
-  <button id="set-timer-btn">Set Timer</button>
-</div>
+
+    <!-- Teacher Table Buttons -->
+    <button id="show-all-scores-btn">Show All Student Scores</button>
+    <button id="show-all-passwords-btn">Show All Student Passwords</button>
 
     <button id="logout-button">Logout</button>
   </div>
@@ -246,7 +136,6 @@
   <script src="DayJS/dayjs.min.js"></script>
   <script type="module" src="kshs.js"></script>
 
-  <!-- ✅ Logout Handler Script -->
   <script>
     document.getElementById('logout-button').addEventListener('click', () => {
       localStorage.removeItem('isTeacherAuthenticated');
