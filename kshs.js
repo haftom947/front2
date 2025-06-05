@@ -1,20 +1,11 @@
 const ws = new WebSocket('wss://kshs-quiz1.onrender.com'); // Use your actual PC IP
 
-let currentTimerValue = 180; // Default
-
 ws.onopen = () => {
-  console.log('Connected to WebSocket server');
   ws.send(JSON.stringify({ type: "registerTeacher" }));
 };
 
 ws.onmessage = (event) => {
   const data = JSON.parse(event.data);
-  console.log('Message from server:', data);
-
-  if (data.type === 'currentTimerValue') {
-    currentTimerValue = data.value;
-    document.getElementById('global-timer-input').value = currentTimerValue;
-  }
 
   if (data.type === 'sentQuestionToTeacher') {
     showTeacherOverlay({
@@ -25,6 +16,10 @@ ws.onmessage = (event) => {
       choiceC: data.choiceC,
       choiceD: data.choiceD
     });
+
+    // Open question for projector view (optional: comment this if not needed)
+    const projectorUrl = `projector.html?question=${encodeURIComponent(data.question)}&A=${encodeURIComponent(data.choiceA)}&B=${encodeURIComponent(data.choiceB)}&C=${encodeURIComponent(data.choiceC)}&D=${encodeURIComponent(data.choiceD)}`;
+    window.open(projectorUrl, 'projectorWindow', 'width=900,height=700');
   }
 
   if (data.type === 'allStudents') {
@@ -65,38 +60,19 @@ ws.onmessage = (event) => {
     });
   }
 
-  if (data.type === 'allStudentScores') {
-    let html = `<h2>Student Scores</h2><table border="1" style="width:100%;"><tr>
-      <th>Name</th><th>ID</th><th>Correct</th><th>Wrong</th><th>Total</th></tr>`;
-    data.students.forEach(s => {
-      const score = s.score || { correct: 0, wrong: 0, total: 0 };
-      html += `<tr>
-        <td>${s.name}</td><td>${s.id}</td>
-        <td>${score.correct}</td><td>${score.wrong}</td><td>${score.total}</td>
-      </tr>`;
-    });
-    html += '</table>';
-    showCustomOverlay(html);
-  }
-  if (data.type === 'allStudentPasswords') {
-    let html = `<h2>Student Passwords</h2><table border="1" style="width:100%;"><tr>
-      <th>Name</th><th>ID</th><th>Password</th></tr>`;
-    data.students.forEach(s => {
-      html += `<tr>
-        <td>${s.name}</td><td>${s.id}</td><td>${s.password}</td>
-      </tr>`;
-    });
-    html += '</table>';
-    showCustomOverlay(html);
+  if (data.type === 'currentTimerValue') {
+    document.getElementById('global-timer-input').value = data.value;
+    document.getElementById('timer-feedback').textContent = 'Timer set to ' + data.value + ' seconds.';
+    setTimeout(() => { document.getElementById('timer-feedback').textContent = ''; }, 2000);
   }
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Timer control logic
   document.getElementById('set-timer-btn').onclick = () => {
     const timerInput = parseInt(document.getElementById('global-timer-input').value, 10) || 180;
-    currentTimerValue = timerInput;
-    ws.send(JSON.stringify({ type: 'setGlobalTimer', value: currentTimerValue }));
+    ws.send(JSON.stringify({ type: 'setGlobalTimer', value: timerInput }));
+    document.getElementById('timer-feedback').textContent = 'Timer set to ' + timerInput + ' seconds.';
+    setTimeout(() => { document.getElementById('timer-feedback').textContent = ''; }, 2000);
   };
 
   document.getElementById('get-students-button').onclick = () => {
@@ -116,61 +92,30 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('question-type-selection').style.display = 'none';
   };
 
-  let selectionMethod = document.querySelector('.js-question-entry-button');
-  if (selectionMethod) {
-    selectionMethod.addEventListener('click', () => {
-      let question = document.querySelector('.js-question-entry');
-      question.classList.add('makeit-visible');
-    });
-  }
-
-  const registerButton = document.querySelector('.js-register-button');
-  if (registerButton) {
-    registerButton.addEventListener('click', () => {
-      let stdName = document.querySelector('.student-name').value.trim();
-      let stdId = document.querySelector('.student-id').value.trim();
-      let stdPassword = document.querySelector('.student-password').value.trim();
-       if (!stdName || !stdId || !stdPassword) {
+  document.querySelector('.js-register-button').onclick = () => {
+    let stdName = document.querySelector('.student-name').value.trim();
+    let stdId = document.querySelector('.student-id').value.trim();
+    let stdPassword = document.querySelector('.student-password').value.trim();
+    if (!stdName || !stdId || !stdPassword) {
       alert('Please fill in all the fields before registering.');
       return;
     }
+    ws.send(JSON.stringify({
+      type: 'register',
+      studentName: stdName,
+      studentId: stdId,
+      studentPassword: stdPassword,
+    }));
+    alert(`Student ${stdName} registered successfully.`);
+    document.querySelector('.student-name').value = '';
+    document.querySelector('.student-id').value = '';
+    document.querySelector('.student-password').value = '';
+  };
 
-      const studentObj = {
-        type: 'register',
-        studentName: stdName,
-        studentId: stdId,
-        studentPassword: stdPassword,
-      };
-
-      ws.send(JSON.stringify(studentObj));
-      alert(`Student ${stdName} registered successfully.`);
-      document.querySelector('.student-name').value = '';
-      document.querySelector('.student-id').value = '';
-      document.querySelector('.student-password').value = '';
-    });
-  }
-
-  const removeButton = document.querySelector('.js-remove-button');
-  if (removeButton) {
-    removeButton.addEventListener('click', () => {
-      if (ws.readyState === WebSocket.OPEN) {
-        const resetData = { type: 'resetStudents' };
-        ws.send(JSON.stringify(resetData));
-        alert('All student data has been reset.');
-      } else {
-        alert('WebSocket connection is not open. Please refresh the page.');
-      }
-    });
-  }
-
-  const resetButton = document.querySelector('.js-reset-system-button');
-  if (resetButton) {
-    resetButton.addEventListener('click', () => {
-      const resetData = { type: 'resetSystem' };
-      ws.send(JSON.stringify(resetData));
-      alert('All students have been reset.');
-    });
-  }
+  document.querySelector('.js-remove-button').onclick = () => {
+    ws.send(JSON.stringify({ type: 'resetStudents' }));
+    alert('All student data has been reset.');
+  };
 
   const sendButton = document.querySelector('.send-button');
   if (sendButton) {
@@ -178,51 +123,31 @@ document.addEventListener('DOMContentLoaded', () => {
       const selectedStudentId = document.getElementById('student-id').value;
       const selectedSubject = document.getElementById('subject').value;
       const selectedQuestionIndex = document.getElementById('question-no').value;
-
       const subjectKey = selectedSubject.charAt(0).toUpperCase() + selectedSubject.slice(1);
       const questionIndex = parseInt(selectedQuestionIndex.replace('q', '')) - 1;
-
-      const questionData = {
+      ws.send(JSON.stringify({
         type: 'sendQuestion',
         studentId: selectedStudentId,
         subject: subjectKey,
         questionIndex: questionIndex
-        // timer not sent here; backend always uses globalTimerValue
-      };
-
-      ws.send(JSON.stringify(questionData));
+      }));
       alert(`Question sent to student ID: ${selectedStudentId}`);
     });
   }
 
-  document.getElementById('show-all-scores-btn').onclick = () => {
-    ws.send(JSON.stringify({ type: 'getAllStudentScores' }));
+  // Show/hide question entry modal
+  document.querySelector('.js-question-entry-button').onclick = () => {
+    document.querySelector('.js-question-entry').classList.add('makeit-visible');
   };
-  document.getElementById('show-all-passwords-btn').onclick = () => {
-    ws.send(JSON.stringify({ type: 'getAllStudentPasswords' }));
-  };
-
-  const questionEntryButton = document.querySelector('.js-question-entry-button');
-  if (questionEntryButton) {
-    questionEntryButton.addEventListener('click', () => {
-      const questionEntryDiv = document.querySelector('.js-question-entry');
-      if (questionEntryDiv) {
-        questionEntryDiv.classList.add('makeit-visible');
-      }
-    });
-
-    const subjectDropdown = document.getElementById('subject-question');
-    if (subjectDropdown) {
-      subjectDropdown.addEventListener('change', () => {
-        const selectedSubject = subjectDropdown.value;
-        if (selectedSubject && selectedSubject !== 'nothing') {
-          window.location.href = `question-web.html?subject=${encodeURIComponent(selectedSubject)}`;
-        }
-      });
+  document.getElementById('subject-question').onchange = () => {
+    const val = document.getElementById('subject-question').value;
+    if (val && val !== 'nothing') {
+      window.location.href = `question-web.html?subject=${encodeURIComponent(val)}`;
     }
-  }
+  };
 });
 
+// Overlay/modal functions
 function showTeacherOverlay({ studentId, question, choiceA, choiceB, choiceC, choiceD, answer, feedback }) {
   let overlay = document.getElementById('teacher-overlay');
   if (!overlay) {
@@ -230,13 +155,11 @@ function showTeacherOverlay({ studentId, question, choiceA, choiceB, choiceC, ch
     overlay.id = 'teacher-overlay';
     document.body.appendChild(overlay);
   }
-
   let feedbackHtml = "";
   if (feedback) {
     const isCorrect = feedback.trim().toLowerCase().startsWith('correct');
     feedbackHtml = `<div class="feedback ${isCorrect ? 'correct' : 'incorrect'}">${feedback}</div>`;
   }
-
   overlay.innerHTML = `
     <h2>KSHS Academic Competition</h2>
     <span class="student-label"><b>Student:</b> ${studentId || ''}</span>
@@ -252,7 +175,6 @@ function showTeacherOverlay({ studentId, question, choiceA, choiceB, choiceC, ch
     <button class="close-btn" id="teacher-overlay-close">Close</button>
   `;
   overlay.style.display = 'block';
-
   document.getElementById('teacher-overlay-close').onclick = () => {
     overlay.style.display = 'none';
   };
