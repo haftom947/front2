@@ -1,5 +1,7 @@
 const ws = new WebSocket('wss://kshs-quiz1.onrender.com'); // Use your actual PC IP
 
+let currentTimerValue = 180; // Default
+
 ws.onopen = () => {
   console.log('Connected to WebSocket server');
   ws.send(JSON.stringify({ type: "registerTeacher" }));
@@ -8,6 +10,12 @@ ws.onopen = () => {
 ws.onmessage = (event) => {
   const data = JSON.parse(event.data);
   console.log('Message from server:', data);
+
+  if (data.type === 'currentTimerValue') {
+    currentTimerValue = data.value;
+    document.getElementById('global-timer-input').value = currentTimerValue;
+  }
+
   if (data.type === 'sentQuestionToTeacher') {
     showTeacherOverlay({
       studentId: data.studentId,
@@ -20,29 +28,29 @@ ws.onmessage = (event) => {
   }
 
   if (data.type === 'allStudents') {
-  let html = `<h2>Registered Students</h2><ul>`;
-  data.students.forEach(s => {
-    html += `<li><b>${s.id}</b>: ${s.name}</li>`;
-  });
-  html += '</ul>';
-  showCustomOverlay(html);
-}
+    let html = `<h2>Registered Students</h2><ul>`;
+    data.students.forEach(s => {
+      html += `<li><b>${s.id}</b>: ${s.name}</li>`;
+    });
+    html += '</ul>';
+    showCustomOverlay(html);
+  }
 
-if (data.type === 'questionsForSubject') {
-  let html = `<h2>Questions for ${data.subject}</h2><ol>`;
-  data.questions.forEach((q, idx) => {
-    html += `<li>
-      <b>Q${idx+1}:</b> ${q.question}<br>
-      <span style="color:#1966c0">A.</span> ${q.choiceA || ""}<br>
-      <span style="color:#1966c0">B.</span> ${q.choiceB || ""}<br>
-      <span style="color:#1966c0">C.</span> ${q.choiceC || ""}<br>
-      <span style="color:#1966c0">D.</span> ${q.choiceD || ""}<br>
-      <span style="color:green"><b>Correct:</b> ${q.correct ? q.correct : "?"}</span>
-    </li><br>`;
-  });
-  html += '</ol>';
-  showCustomOverlay(html);
-}
+  if (data.type === 'questionsForSubject') {
+    let html = `<h2>Questions for ${data.subject}</h2><ol>`;
+    data.questions.forEach((q, idx) => {
+      html += `<li>
+        <b>Q${idx+1}:</b> ${q.question}<br>
+        <span style="color:#1966c0">A.</span> ${q.choiceA || ""}<br>
+        <span style="color:#1966c0">B.</span> ${q.choiceB || ""}<br>
+        <span style="color:#1966c0">C.</span> ${q.choiceC || ""}<br>
+        <span style="color:#1966c0">D.</span> ${q.choiceD || ""}<br>
+        <span style="color:green"><b>Correct:</b> ${q.correct ? q.correct : "?"}</span>
+      </li><br>`;
+    });
+    html += '</ol>';
+    showCustomOverlay(html);
+  }
 
   if (data.type === 'studentAnswered') {
     showTeacherOverlay({
@@ -56,27 +64,58 @@ if (data.type === 'questionsForSubject') {
       feedback: data.feedback
     });
   }
+
+  if (data.type === 'allStudentScores') {
+    let html = `<h2>Student Scores</h2><table border="1" style="width:100%;"><tr>
+      <th>Name</th><th>ID</th><th>Correct</th><th>Wrong</th><th>Total</th></tr>`;
+    data.students.forEach(s => {
+      const score = s.score || { correct: 0, wrong: 0, total: 0 };
+      html += `<tr>
+        <td>${s.name}</td><td>${s.id}</td>
+        <td>${score.correct}</td><td>${score.wrong}</td><td>${score.total}</td>
+      </tr>`;
+    });
+    html += '</table>';
+    showCustomOverlay(html);
+  }
+  if (data.type === 'allStudentPasswords') {
+    let html = `<h2>Student Passwords</h2><table border="1" style="width:100%;"><tr>
+      <th>Name</th><th>ID</th><th>Password</th></tr>`;
+    data.students.forEach(s => {
+      html += `<tr>
+        <td>${s.name}</td><td>${s.id}</td><td>${s.password}</td>
+      </tr>`;
+    });
+    html += '</table>';
+    showCustomOverlay(html);
+  }
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-document.getElementById('get-students-button').onclick = () => {
-  ws.send(JSON.stringify({ type: 'getAllStudents' }));
-};
+  // Timer control logic
+  document.getElementById('set-timer-btn').onclick = () => {
+    const timerInput = parseInt(document.getElementById('global-timer-input').value, 10) || 180;
+    currentTimerValue = timerInput;
+    ws.send(JSON.stringify({ type: 'setGlobalTimer', value: currentTimerValue }));
+  };
 
-// Show the type dropdown when "Show Questions for Selected Subject" is clicked
-document.getElementById('get-questions-button').onclick = () => {
-  document.getElementById('question-type-selection').style.display = 'block';
-};
+  document.getElementById('get-students-button').onclick = () => {
+    ws.send(JSON.stringify({ type: 'getAllStudents' }));
+  };
 
-// When the type is confirmed, send subject + type to server, then hide the dropdown again
-document.getElementById('confirm-type-button').onclick = () => {
-  const subject = document.getElementById('question-type').value;
-  ws.send(JSON.stringify({
-    type: 'getQuestionsForSubject',
-    subject
-  }));
-  document.getElementById('question-type-selection').style.display = 'none';
-};
+  document.getElementById('get-questions-button').onclick = () => {
+    document.getElementById('question-type-selection').style.display = 'block';
+  };
+
+  document.getElementById('confirm-type-button').onclick = () => {
+    const subject = document.getElementById('question-type').value;
+    ws.send(JSON.stringify({
+      type: 'getQuestionsForSubject',
+      subject
+    }));
+    document.getElementById('question-type-selection').style.display = 'none';
+  };
+
   let selectionMethod = document.querySelector('.js-question-entry-button');
   if (selectionMethod) {
     selectionMethod.addEventListener('click', () => {
@@ -104,20 +143,19 @@ document.getElementById('confirm-type-button').onclick = () => {
       };
 
       ws.send(JSON.stringify(studentObj));
-alert(`Student ${stdName} registered successfully.`);
-// Clear input fields after successful registration
-document.querySelector('.student-name').value = '';
-document.querySelector('.student-id').value = '';
-document.querySelector('.student-password').value = '';
+      alert(`Student ${stdName} registered successfully.`);
+      document.querySelector('.student-name').value = '';
+      document.querySelector('.student-id').value = '';
+      document.querySelector('.student-password').value = '';
     });
   }
 
   const removeButton = document.querySelector('.js-remove-button');
   if (removeButton) {
     removeButton.addEventListener('click', () => {
-      if (ws.readyState === WebSocket.OPEN) { // Ensure WebSocket is open
-        const resetData = { type: 'resetStudents' }; // Message type for resetting students
-        ws.send(JSON.stringify(resetData)); // Send the reset message to the server
+      if (ws.readyState === WebSocket.OPEN) {
+        const resetData = { type: 'resetStudents' };
+        ws.send(JSON.stringify(resetData));
         alert('All student data has been reset.');
       } else {
         alert('WebSocket connection is not open. Please refresh the page.');
@@ -138,11 +176,9 @@ document.querySelector('.student-password').value = '';
   if (sendButton) {
     sendButton.addEventListener('click', () => {
       const selectedStudentId = document.getElementById('student-id').value;
-      console.log(selectedStudentId)   
-       const selectedSubject = document.getElementById('subject').value;
-             const selectedQuestionIndex = document.getElementById('question-no').value;
+      const selectedSubject = document.getElementById('subject').value;
+      const selectedQuestionIndex = document.getElementById('question-no').value;
 
-      // Capitalize subject to match server keys
       const subjectKey = selectedSubject.charAt(0).toUpperCase() + selectedSubject.slice(1);
       const questionIndex = parseInt(selectedQuestionIndex.replace('q', '')) - 1;
 
@@ -151,6 +187,7 @@ document.querySelector('.student-password').value = '';
         studentId: selectedStudentId,
         subject: subjectKey,
         questionIndex: questionIndex
+        // timer not sent here; backend always uses globalTimerValue
       };
 
       ws.send(JSON.stringify(questionData));
@@ -158,12 +195,19 @@ document.querySelector('.student-password').value = '';
     });
   }
 
+  document.getElementById('show-all-scores-btn').onclick = () => {
+    ws.send(JSON.stringify({ type: 'getAllStudentScores' }));
+  };
+  document.getElementById('show-all-passwords-btn').onclick = () => {
+    ws.send(JSON.stringify({ type: 'getAllStudentPasswords' }));
+  };
+
   const questionEntryButton = document.querySelector('.js-question-entry-button');
   if (questionEntryButton) {
     questionEntryButton.addEventListener('click', () => {
       const questionEntryDiv = document.querySelector('.js-question-entry');
       if (questionEntryDiv) {
-        questionEntryDiv.classList.add('makeit-visible'); // Make the subject selection visible
+        questionEntryDiv.classList.add('makeit-visible');
       }
     });
 
@@ -172,13 +216,13 @@ document.querySelector('.student-password').value = '';
       subjectDropdown.addEventListener('change', () => {
         const selectedSubject = subjectDropdown.value;
         if (selectedSubject && selectedSubject !== 'nothing') {
-          // Redirect to question-web.html with the selected subject
           window.location.href = `question-web.html?subject=${encodeURIComponent(selectedSubject)}`;
         }
       });
     }
   }
 });
+
 function showTeacherOverlay({ studentId, question, choiceA, choiceB, choiceC, choiceD, answer, feedback }) {
   let overlay = document.getElementById('teacher-overlay');
   if (!overlay) {
@@ -187,7 +231,6 @@ function showTeacherOverlay({ studentId, question, choiceA, choiceB, choiceC, ch
     document.body.appendChild(overlay);
   }
 
-  // Feedback class for color
   let feedbackHtml = "";
   if (feedback) {
     const isCorrect = feedback.trim().toLowerCase().startsWith('correct');
