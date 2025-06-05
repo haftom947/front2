@@ -17,10 +17,7 @@ ws.onmessage = (event) => {
       choiceD: data.choiceD
     });
 
-    // Open question for projector view (optional: comment this if not needed)
-    const projectorUrl = `projector.html?question=${encodeURIComponent(data.question)}&A=${encodeURIComponent(data.choiceA)}&B=${encodeURIComponent(data.choiceB)}&C=${encodeURIComponent(data.choiceC)}&D=${encodeURIComponent(data.choiceD)}`;
-    window.open(projectorUrl, 'projectorWindow', 'width=900,height=700');
-  }
+
 
   if (data.type === 'allStudents') {
     let html = `<h2>Registered Students</h2><ul>`;
@@ -78,6 +75,13 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('get-students-button').onclick = () => {
     ws.send(JSON.stringify({ type: 'getAllStudents' }));
   };
+
+  document.getElementById('show-all-scores-btn').onclick = () => {
+  ws.send(JSON.stringify({ type: 'getAllStudentScores' }));
+};
+document.getElementById('show-all-passwords-btn').onclick = () => {
+  ws.send(JSON.stringify({ type: 'getAllStudentPasswords' }));
+};
 
   document.getElementById('get-questions-button').onclick = () => {
     document.getElementById('question-type-selection').style.display = 'block';
