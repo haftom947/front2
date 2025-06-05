@@ -122,47 +122,47 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   document.querySelector('.js-register-button').onclick = () => {
-    let stdName = document.querySelector('.student-name').value.trim();
-    let stdId = document.querySelector('.student-id').value.trim();
-    let stdPassword = document.querySelector('.student-password').value.trim();
-    if (!stdName || !stdId || !stdPassword) {
-      alert('Please fill in all the fields before registering.');
-      return;
-    }
-    ws.send(JSON.stringify({
-      type: 'register',
-      studentName: stdName,
-      studentId: stdId,
-      studentPassword: stdPassword,
-    }));
-    alert(`Student ${stdName} registered successfully.`);
-    document.querySelector('.student-name').value = '';
-    document.querySelector('.student-id').value = '';
-    document.querySelector('.student-password').value = '';
-  };
+  let stdName = document.querySelector('.student-name').value.trim();
+  let stdId = document.querySelector('.student-id').value.trim();
+  let stdPassword = document.querySelector('.student-password').value.trim();
+  if (!stdName || !stdId || !stdPassword) {
+    alert('Please fill in all the fields before registering.');
+    return;
+  }
+  ws.send(JSON.stringify({
+    type: 'register',
+    studentName: stdName,
+    studentId: stdId,
+    studentPassword: stdPassword,
+  }));
+  showSuccessMessage('register-success', `Student ${stdName} registered successfully.`);
+  document.querySelector('.student-name').value = '';
+  document.querySelector('.student-id').value = '';
+  document.querySelector('.student-password').value = '';
+};
 
   document.querySelector('.js-remove-button').onclick = () => {
     ws.send(JSON.stringify({ type: 'resetStudents' }));
     alert('All student data has been reset.');
   };
 
-  const sendButton = document.querySelector('.send-button');
-  if (sendButton) {
-    sendButton.addEventListener('click', () => {
-      const selectedStudentId = document.getElementById('student-id').value;
-      const selectedSubject = document.getElementById('subject').value;
-      const selectedQuestionIndex = document.getElementById('question-no').value;
-      const subjectKey = selectedSubject.charAt(0).toUpperCase() + selectedSubject.slice(1);
-      const questionIndex = parseInt(selectedQuestionIndex.replace('q', '')) - 1;
-      ws.send(JSON.stringify({
-        type: 'sendQuestion',
-        studentId: selectedStudentId,
-        subject: subjectKey,
-        questionIndex: questionIndex
-      }));
-      alert(`Question sent to student ID: ${selectedStudentId}`);
-    });
-  }
+ const sendButton = document.querySelector('.send-button');
+if (sendButton) {
+  sendButton.addEventListener('click', () => {
+    const selectedStudentId = document.getElementById('student-id').value;
+    const selectedSubject = document.getElementById('subject').value;
+    const selectedQuestionIndex = document.getElementById('question-no').value;
+    const subjectKey = selectedSubject.charAt(0).toUpperCase() + selectedSubject.slice(1);
+    const questionIndex = parseInt(selectedQuestionIndex.replace('q', '')) - 1;
+    ws.send(JSON.stringify({
+      type: 'sendQuestion',
+      studentId: selectedStudentId,
+      subject: subjectKey,
+      questionIndex: questionIndex
+    }));
+    showSuccessMessage('question-success', `Question sent to student ID: ${selectedStudentId}`);
+  });
+}
 
   // Show/hide question entry modal
   document.querySelector('.js-question-entry-button').onclick = () => {
@@ -231,4 +231,12 @@ function showCustomOverlay(html) {
   document.getElementById('teacher-overlay-close').onclick = () => {
     overlay.style.display = 'none';
   };
+}
+function showSuccessMessage(id, message, timeout = 2200) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = message;
+  el.className = 'field-feedback success';
+  clearTimeout(el._timeout);
+  el._timeout = setTimeout(() => { el.textContent = ''; }, timeout);
 }
