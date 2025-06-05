@@ -42,7 +42,7 @@ ws.onmessage = (event) => {
       choiceC: data.choiceC,
       choiceD: data.choiceD
     });
-  }
+  } // <-- THIS IS THE FIX
 
   if (data.type === 'allStudents') {
     let html = `<h2>Registered Students</h2><ul>`;
