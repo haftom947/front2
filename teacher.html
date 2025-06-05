@@ -11,17 +11,6 @@
       window.location.href = 'teacher-login.html';
     }
   </script>
-  <style>
-    .button-column {
-      display: flex;
-      flex-direction: row;
-      gap: 0.8em;
-      flex: 1 1;
-      margin-top: 0.6em;
-      align-items: stretch;
-    }
-    /* ... existing overlay styles ... */
-  </style>
 </head>
 <body>
   <div class="main-host-page">
@@ -53,11 +42,12 @@
       </div>
     </div>
 
-    <!-- GLOBAL TIMER CONTROL -->
+    <!-- Timer Control Example -->
     <div style="margin-bottom:12px;">
       <label for="global-timer-input">Timer (seconds): </label>
       <input type="number" id="global-timer-input" min="10" max="600" value="180" style="width:60px;">
       <button id="set-timer-btn">Set Timer</button>
+      <div id="timer-feedback"></div>
     </div>
 
     <div class="selection-all">
@@ -126,16 +116,11 @@
       <div class="question-web js-question-web"></div>
     </div>
 
-    <!-- Teacher Table Buttons -->
-    <button id="show-all-scores-btn">Show All Student Scores</button>
-    <button id="show-all-passwords-btn">Show All Student Passwords</button>
-
     <button id="logout-button">Logout</button>
   </div>
 
   <script src="DayJS/dayjs.min.js"></script>
   <script type="module" src="kshs.js"></script>
-
   <script>
     document.getElementById('logout-button').addEventListener('click', () => {
       localStorage.removeItem('isTeacherAuthenticated');
