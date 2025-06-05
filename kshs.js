@@ -8,29 +8,30 @@ ws.onmessage = (event) => {
   const data = JSON.parse(event.data);
 
   if (data.type === 'allStudentScores') {
-  let html = `<h2>Student Scores</h2><table border="1" style="width:100%;"><tr>
-    <th>Name</th><th>ID</th><th>Correct</th><th>Wrong</th><th>Total</th></tr>`;
-  data.students.forEach(s => {
-    const score = s.score || { correct: 0, wrong: 0, total: 0 };
-    html += `<tr>
-      <td>${s.name}</td><td>${s.id}</td>
-      <td>${score.correct}</td><td>${score.wrong}</td><td>${score.total}</td>
-    </tr>`;
-  });
-  html += '</table>';
-  showCustomOverlay(html);
-}
-if (data.type === 'allStudentPasswords') {
-  let html = `<h2>Student Passwords</h2><table border="1" style="width:100%;"><tr>
-    <th>Name</th><th>ID</th><th>Password</th></tr>`;
-  data.students.forEach(s => {
-    html += `<tr>
-      <td>${s.name}</td><td>${s.id}</td><td>${s.password}</td>
-    </tr>`;
-  });
-  html += '</table>';
-  showCustomOverlay(html);
-}
+    let html = `<h2>Student Scores</h2><table border="1" style="width:100%;"><tr>
+      <th>Name</th><th>ID</th><th>Correct</th><th>Wrong</th><th>Total</th></tr>`;
+    data.students.forEach(s => {
+      const score = s.score || { correct: 0, wrong: 0, total: 0 };
+      html += `<tr>
+        <td>${s.name}</td><td>${s.id}</td>
+        <td>${score.correct}</td><td>${score.wrong}</td><td>${score.total}</td>
+      </tr>`;
+    });
+    html += '</table>';
+    showCustomOverlay(html);
+  }
+
+  if (data.type === 'allStudentPasswords') {
+    let html = `<h2>Student Passwords</h2><table border="1" style="width:100%;"><tr>
+      <th>Name</th><th>ID</th><th>Password</th></tr>`;
+    data.students.forEach(s => {
+      html += `<tr>
+        <td>${s.name}</td><td>${s.id}</td><td>${s.password}</td>
+      </tr>`;
+    });
+    html += '</table>';
+    showCustomOverlay(html);
+  }
 
   if (data.type === 'sentQuestionToTeacher') {
     showTeacherOverlay({
@@ -41,8 +42,7 @@ if (data.type === 'allStudentPasswords') {
       choiceC: data.choiceC,
       choiceD: data.choiceD
     });
-
-
+  }
 
   if (data.type === 'allStudents') {
     let html = `<h2>Registered Students</h2><ul>`;
@@ -102,11 +102,11 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   document.getElementById('show-all-scores-btn').onclick = () => {
-  ws.send(JSON.stringify({ type: 'getAllStudentScores' }));
-};
-document.getElementById('show-all-passwords-btn').onclick = () => {
-  ws.send(JSON.stringify({ type: 'getAllStudentPasswords' }));
-};
+    ws.send(JSON.stringify({ type: 'getAllStudentScores' }));
+  };
+  document.getElementById('show-all-passwords-btn').onclick = () => {
+    ws.send(JSON.stringify({ type: 'getAllStudentPasswords' }));
+  };
 
   document.getElementById('get-questions-button').onclick = () => {
     document.getElementById('question-type-selection').style.display = 'block';
