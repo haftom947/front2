@@ -2,6 +2,9 @@ const ws = new WebSocket('wss://kshs-quiz1.onrender.com'); // Use your actual PC
 
 ws.onopen = () => {
   ws.send(JSON.stringify({ type: "registerTeacher" }));
+  const subjectSelect = document.getElementById('subject');
+  let subjectKey = subjectSelect.value.charAt(0).toUpperCase() + subjectSelect.value.slice(1);
+  populateQuestionDropdown(subjectKey);
 };
 
 ws.onmessage = (event) => {
@@ -114,9 +117,7 @@ document.getElementById('subject').addEventListener('change', function () {
   populateQuestionDropdown(subjectKey);
 });
 document.addEventListener('DOMContentLoaded', () => {
-  const subjectSelect = document.getElementById('subject');
-  let subjectKey = subjectSelect.value.charAt(0).toUpperCase() + subjectSelect.value.slice(1);
-  populateQuestionDropdown(subjectKey);
+  
   document.getElementById('set-timer-btn').onclick = () => {
     const timerInput = parseInt(document.getElementById('global-timer-input').value, 10) || 180;
     ws.send(JSON.stringify({ type: 'setGlobalTimer', value: timerInput }));
