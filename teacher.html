@@ -17,7 +17,7 @@
     <h1 class="host-title">Host Control Page</h1>
     <div class="register-area">
       <input class="student-name" type="text" placeholder="Enter student Name" required />
-      <input class="student-id" type="text" placeholder="Enter Student ID" required />
+      <input class="student-id" id="register-student-id" type="text" placeholder="Enter Student ID" required />
       <input class="student-password" type="password" placeholder="Set student's Entry code" required />
       <div class="field-feedback" id="register-success"></div>
       <div class="button-column">
@@ -53,8 +53,8 @@
 
     <div class="selection-all">
       <div class="student-selection">
-        <label for="student-id">Select a Student</label>
-        <select name="Student" id="student-id">
+        <label for="select-student-id">Select a Student</label>
+        <select name="Student" id="select-student-id">
           <option value="S1" selected>S1</option>
           <option value="S2">S2</option>
           <option value="S3">S3</option>
