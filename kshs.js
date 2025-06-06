@@ -31,7 +31,6 @@ function initializeUI() {
     populateQuestionDropdown(subjectKey);
 
     subjectSelect.addEventListener('change', function () {
-      // Only fire if ws is actually open!
       if (wsReady) {
         let subjectKey = subjectSelect.value.charAt(0).toUpperCase() + subjectSelect.value.slice(1);
         populateQuestionDropdown(subjectKey);
@@ -102,7 +101,7 @@ function initializeUI() {
   if (registerBtn) {
     registerBtn.onclick = () => {
       const stdName = document.querySelector('.student-name')?.value.trim();
-      const stdId = document.querySelector('.student-id')?.value.trim();
+      const stdId = document.getElementById('register-student-id')?.value.trim();
       const stdPassword = document.querySelector('.student-password')?.value.trim();
       if (!stdName || !stdId || !stdPassword) {
         alert('Please fill in all the fields before registering.');
@@ -116,7 +115,7 @@ function initializeUI() {
       }));
       showSuccessMessage('register-success', `Student ${stdName} registered successfully.`);
       document.querySelector('.student-name').value = '';
-      document.querySelector('.student-id').value = '';
+      document.getElementById('register-student-id').value = '';
       document.querySelector('.student-password').value = '';
     };
   }
@@ -132,7 +131,7 @@ function initializeUI() {
   const sendButton = document.querySelector('.send-button');
   if (sendButton) {
     sendButton.addEventListener('click', () => {
-      const selectedStudentId = document.getElementById('student-id')?.value;
+      const selectedStudentId = document.getElementById('select-student-id')?.value;
       const selectedSubject = document.getElementById('subject')?.value;
       const selectedQuestionIndex = document.getElementById('question-no')?.value;
       if (!selectedStudentId || !selectedSubject || !selectedQuestionIndex) {
@@ -287,10 +286,8 @@ ws.onmessage = (event) => {
 
 function populateQuestionDropdown(subject) {
   ws.send(JSON.stringify({ type: 'getQuestionsForSubject', subject }));
-  // The actual dropdown is repopulated in the 'questionsForSubject' message handler above
 }
 
-// Overlay/modal functions
 function showTeacherOverlay({ studentId, question, choiceA, choiceB, choiceC, choiceD, answer, feedback }) {
   let overlay = document.getElementById('teacher-overlay');
   if (!overlay) {
