@@ -1,3 +1,8 @@
+ window.addEventListener("pageshow", function (event) {
+  if (event.persisted) {
+    window.location.reload();
+  }
+});
 const ws = new WebSocket('wss://kshs-quiz1.onrender.com'); // Use your actual PC IP
 
 ws.onopen = () => {
