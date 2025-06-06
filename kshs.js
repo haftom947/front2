@@ -248,6 +248,7 @@ function showCustomOverlay(html) {
     overlay.style.zIndex = 1000;
     overlay.style.maxWidth = '700px';
     overlay.style.width = '90%';
+    // don't append overlay to any container that holds your main controls!
     document.body.appendChild(overlay);
   }
   overlay.innerHTML = `
