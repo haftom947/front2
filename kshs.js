@@ -5,6 +5,14 @@ window.addEventListener("pageshow", function (event) {
   }
 });
 
+// Always reset overlays/modals on load for reliability
+window.addEventListener('DOMContentLoaded', function() {
+  var overlay = document.getElementById('teacher-overlay');
+  if (overlay) overlay.style.display = 'none';
+  var entry = document.querySelector('.js-question-entry');
+  if (entry) entry.classList.remove('makeit-visible');
+});
+
 const ws = new WebSocket('wss://kshs-quiz1.onrender.com');
 let wsReady = false;
 let domReady = false;
