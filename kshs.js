@@ -18,9 +18,27 @@ let wsReady = false;
 let domReady = false;
 let initialized = false;
 
+// --- Dynamic student selection ---
+function populateStudentDropdown(studentList) {
+  const select = document.getElementById('select-student-id');
+  if (!select) return;
+  select.innerHTML = '<option value="" selected>Select Student</option>';
+  studentList.forEach(student => {
+    const opt = document.createElement('option');
+    opt.value = student.id;
+    opt.textContent = `${student.name} (${student.id})`;
+    select.appendChild(opt);
+  });
+}
+
 function initializeUI() {
   if (!wsReady || !domReady || initialized) return;
   initialized = true;
+
+  // Request latest students for the dropdown (also after registration)
+  ws.send(JSON.stringify({ type: 'getAllStudents' }));
+
+  // Subject/question dropdown dynamic
   const subjectSelect = document.getElementById('subject');
   if (subjectSelect) {
     let subjectKey = subjectSelect.value.charAt(0).toUpperCase() + subjectSelect.value.slice(1);
@@ -32,6 +50,7 @@ function initializeUI() {
       }
     });
   }
+
   const setTimerBtn = document.getElementById('set-timer-btn');
   if (setTimerBtn) {
     setTimerBtn.onclick = () => {
@@ -105,6 +124,8 @@ function initializeUI() {
       document.querySelector('.student-name').value = '';
       document.getElementById('register-student-id').value = '';
       document.querySelector('.student-password').value = '';
+      // --- Request updated student list right after registration
+      ws.send(JSON.stringify({ type: 'getAllStudents' }));
     };
   }
   const removeBtn = document.querySelector('.js-remove-button');
@@ -112,6 +133,8 @@ function initializeUI() {
     removeBtn.onclick = () => {
       ws.send(JSON.stringify({ type: 'resetStudents' }));
       alert('All student data has been reset.');
+      // --- Request updated student list after reset
+      ws.send(JSON.stringify({ type: 'getAllStudents' }));
     };
   }
   const sendButton = document.querySelector('.send-button');
@@ -189,12 +212,21 @@ ws.onmessage = (event) => {
   }
 
   if (data.type === 'allStudents') {
+    // --- Populate student dropdown dynamically
+    if (Array.isArray(data.students)) {
+      populateStudentDropdown(data.students);
+    }
+    // --- Also, show overlay for the "Show All Students" button
     let html = `<h2>Registered Students</h2><ul>`;
     data.students.forEach(s => {
       html += `<li><b>${s.id}</b>: ${s.name}</li>`;
     });
     html += '</ul>';
-    showCustomOverlay(html);
+    // Only show overlay if this was the result of the "Show All Students" button
+    if (window.triggeredShowAllStudents) {
+      showCustomOverlay(html);
+      window.triggeredShowAllStudents = false;
+    }
   }
 
   if (data.type === 'questionsForSubject') {
@@ -316,3 +348,9 @@ function showSuccessMessage(id, message, timeout = 2200) {
   clearTimeout(el._timeout);
   el._timeout = setTimeout(() => { el.textContent = ''; }, timeout);
 }
+
+// --- For show all students overlay (avoid double overlays on every getAllStudents)
+document.getElementById('get-students-button').addEventListener('click', function() {
+  window.triggeredShowAllStudents = true;
+  ws.send(JSON.stringify({ type: 'getAllStudents' }));
+});
