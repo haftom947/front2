@@ -65,7 +65,7 @@
       <div class="subject-selection">
         <label for="subject">Select a Subject</label>
         <select name="Subject" id="subject">
-          <option value="here" selected>Here</option>
+        <option value="here" selected>Here</option>
           <option value="maths" >Maths</option>
           <option value="english">English</option>
           <option value="chemistry">Chemistry</option>
@@ -87,25 +87,25 @@
     </div>
 
     <!-- Inline modal for question entry -->
-    <div id="question-entry-modal" class="modal" style="display:none;">
-      <div class="modal-content">
-        <span id="close-question-entry" style="float:right; cursor:pointer;">&times;</span>
-        <h3>Enter a Question</h3>
-        <form id="question-entry-form">
-          <label>Question:</label>
-          <textarea id="qe-question" required></textarea>
-          <label>Choice A:</label>
-          <input type="text" id="qe-a" required>
-          <label>Choice B:</label>
-          <input type="text" id="qe-b" required>
-          <label>Choice C:</label>
-          <input type="text" id="qe-c" required>
-          <label>Choice D:</label>
-          <input type="text" id="qe-d" required>
-          <label>Correct Answer (A/B/C/D):</label>
-          <input type="text" id="qe-correct" maxlength="1" required>
-          <label>Subject:</label>
-          <select id="qe-subject" required>
+    <div id="question-entry-modal" class="qe-modal" style="display:none;">
+      <div class="qe-modal-content">
+        <span id="close-question-entry" class="qe-close-btn" title="Close">&times;</span>
+        <h3 class="qe-title">Enter a Question</h3>
+        <form id="question-entry-form" autocomplete="off">
+          <label class="qe-label">Question:</label>
+          <textarea id="qe-question" class="qe-textarea" required></textarea>
+          <label class="qe-label">Choice A:</label>
+          <input type="text" id="qe-a" class="qe-input" required>
+          <label class="qe-label">Choice B:</label>
+          <input type="text" id="qe-b" class="qe-input" required>
+          <label class="qe-label">Choice C:</label>
+          <input type="text" id="qe-c" class="qe-input" required>
+          <label class="qe-label">Choice D:</label>
+          <input type="text" id="qe-d" class="qe-input" required>
+          <label class="qe-label">Correct Answer (A/B/C/D):</label>
+          <input type="text" id="qe-correct" class="qe-input" maxlength="1" required>
+          <label class="qe-label">Subject:</label>
+          <select id="qe-subject" class="qe-select" required>
             <option value="Maths">Maths</option>
             <option value="English">English</option>
             <option value="Chemistry">Chemistry</option>
@@ -115,9 +115,9 @@
             <option value="Physics">Physics</option>
             <option value="Geography">Geography</option>
           </select>
-          <button type="submit">Save Question</button>
+          <button type="submit" class="qe-save-btn">Save Question</button>
         </form>
-        <div id="qe-feedback"></div>
+        <div id="qe-feedback" class="qe-feedback"></div>
       </div>
     </div>
 
@@ -162,6 +162,7 @@
       const correct = document.getElementById('qe-correct').value.toUpperCase();
       if (!['A', 'B', 'C', 'D'].includes(correct)) {
         document.getElementById('qe-feedback').textContent = 'Correct answer must be A, B, C, or D.';
+        document.getElementById('qe-feedback').style.color = '#d32f2f';
         return;
       }
       ws.send(JSON.stringify({
@@ -172,6 +173,7 @@
         }
       }));
       document.getElementById('qe-feedback').textContent = 'Question saved!';
+      document.getElementById('qe-feedback').style.color = '#197d3b';
       this.reset();
       setTimeout(() => {
         document.getElementById('question-entry-modal').style.display = 'none';
@@ -180,24 +182,123 @@
     };
   </script>
   <style>
-    .modal {
+    /* Modal Overlay and Centering */
+    .qe-modal {
       position: fixed;
       top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(0,0,0,0.45);
+      background: rgba(30,60,114,0.13);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 10001;
+      animation: qeDropIn 0.45s;
     }
-    .modal-content {
+    @keyframes qeDropIn {
+      from { opacity: 0; transform: scale(0.97);}
+      to   { opacity: 1; transform: scale(1);}
+    }
+    .qe-modal-content {
       background: #fff;
-      padding: 24px 18px;
-      border-radius: 10px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-      min-width: 310px;
-      max-width: 360px;
-      width: 100%;
+      padding: 40px 28px 30px 28px;
+      border-radius: 16px;
+      min-width: 320px;
+      max-width: 410px;
+      width: 97vw;
+      box-shadow: 0 15px 32px rgba(30,60,114,0.13);
       position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      animation: qeDropIn 0.5s;
+    }
+    .qe-title {
+      text-align: center;
+      color: #1e3c72;
+      margin-bottom: 12px;
+      font-size: 1.25em;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    .qe-label {
+      margin-top: 9px;
+      font-weight: 700;
+      color: #1966c0;
+      font-size: 1em;
+      margin-bottom: 1px;
+      display: block;
+    }
+    .qe-input, .qe-select, .qe-textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid #d0d0d0;
+      border-radius: 10px;
+      font-size: 16px;
+      margin-bottom: 2px;
+      background: #f7fafd;
+      transition: border 0.3s, box-shadow 0.3s;
+    }
+    .qe-input:focus, .qe-select:focus, .qe-textarea:focus {
+      border-color: #1e88e5;
+      outline: none;
+      box-shadow: 0 0 8px rgba(30,136,229,0.13);
+      background: #f0f7ff;
+    }
+    .qe-textarea {
+      min-height: 70px;
+      resize: vertical;
+      margin-bottom: 3px;
+    }
+    .qe-save-btn {
+      padding: 12px 0;
+      font-size: 1.05em;
+      font-weight: bold;
+      background: linear-gradient(to right, #00b09b, #96c93d);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 15px;
+      margin-bottom: 2px;
+      box-shadow: 0 2px 8px rgba(25,102,192,0.06);
+    }
+    .qe-save-btn:hover {
+      background: linear-gradient(to right, #42e695, #3bb2b8);
+      transform: scale(1.03);
+      box-shadow: 0 0 10px rgba(0,0,0,0.18);
+    }
+    .qe-close-btn {
+      position: absolute;
+      top: 15px; right: 20px;
+      font-size: 1.8rem;
+      color: #37474f;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 2;
+      padding: 0 6px;
+      background: none;
+      border: none;
+      line-height: 1;
+      transition: color 0.22s;
+    }
+    .qe-close-btn:hover {
+      color: #d32f2f;
+      background: #f4eaea;
+      border-radius: 7px;
+    }
+    .qe-feedback {
+      text-align: center;
+      margin-top: 8px;
+      font-size: 1em;
+      min-height: 22px;
+      font-weight: 500;
+    }
+    @media (max-width: 500px) {
+      .qe-modal-content {
+        padding: 15px 5vw 18px 5vw;
+        min-width: 0;
+        max-width: 97vw;
+      }
     }
   </style>
 </body>
