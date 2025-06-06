@@ -6,7 +6,6 @@
   <title>Host Control Page</title>
   <link rel="stylesheet" href="kshs.css" />
   <script>
-    // Redirect to login page if not authenticated
     if (localStorage.getItem('isTeacherAuthenticated') !== 'true') {
       window.location.href = 'teacher-login.html';
     }
@@ -63,7 +62,6 @@
           <option value="S6">S6</option>
         </select>
       </div>
-
       <div class="subject-selection">
         <label for="subject">Select a Subject</label>
         <select name="Subject" id="subject">
@@ -77,7 +75,6 @@
           <option value="geography">Geography</option>
         </select>
       </div>
-
       <div class="question-selection">
         <label for="question-no">Select Question</label>
         <select id="question-no"></select>
@@ -86,26 +83,43 @@
       <button class="send-button">Send Question</button>
       <div class="field-feedback" id="question-success"></div>
       <button class="question-entry-button js-question-entry-button">Enter Your Question</button>
-
-      <div class="questions-entry js-question-entry">
-        <label for="subject-question">Select a Subject</label>
-        <select name="Subject" id="subject-question">
-          <option value="nothing" selected disabled>Here</option>
-          <option value="maths">Maths</option>
-          <option value="english">English</option>
-          <option value="chemistry">Chemistry</option>
-          <option value="biology">Biology</option>
-          <option value="tigrigna">Tigrigna</option>
-          <option value="economics">Economics</option>
-          <option value="physics">Physics</option>
-          <option value="geography">Geography</option>
-        </select>
-      </div>
-
-      <div class="question-web js-question-web"></div>
     </div>
 
-    <!-- The missing button group -->
+    <!-- Inline modal for question entry -->
+    <div id="question-entry-modal" class="modal" style="display:none;">
+      <div class="modal-content">
+        <span id="close-question-entry" style="float:right; cursor:pointer;">&times;</span>
+        <h3>Enter a Question</h3>
+        <form id="question-entry-form">
+          <label>Question:</label>
+          <textarea id="qe-question" required></textarea>
+          <label>Choice A:</label>
+          <input type="text" id="qe-a" required>
+          <label>Choice B:</label>
+          <input type="text" id="qe-b" required>
+          <label>Choice C:</label>
+          <input type="text" id="qe-c" required>
+          <label>Choice D:</label>
+          <input type="text" id="qe-d" required>
+          <label>Correct Answer (A/B/C/D):</label>
+          <input type="text" id="qe-correct" maxlength="1" required>
+          <label>Subject:</label>
+          <select id="qe-subject" required>
+            <option value="Maths">Maths</option>
+            <option value="English">English</option>
+            <option value="Chemistry">Chemistry</option>
+            <option value="Biology">Biology</option>
+            <option value="Tigrigna">Tigrigna</option>
+            <option value="Economics">Economics</option>
+            <option value="Physics">Physics</option>
+            <option value="Geography">Geography</option>
+          </select>
+          <button type="submit">Save Question</button>
+        </form>
+        <div id="qe-feedback"></div>
+      </div>
+    </div>
+
     <div class="button-column" style="margin-top: 6px;">
       <button id="show-all-scores-btn" class="teacher-action">Show All Student Scores</button>
       <button id="show-all-passwords-btn" class="teacher-action">Show All Student Passwords</button>
@@ -120,14 +134,70 @@
     window.addEventListener('DOMContentLoaded', function() {
       var overlay = document.getElementById('teacher-overlay');
       if (overlay) overlay.style.display = 'none';
-      var entry = document.querySelector('.js-question-entry');
-      if (entry) entry.classList.remove('makeit-visible');
+      var entry = document.getElementById('question-entry-modal');
+      if (entry) entry.style.display = 'none';
     });
 
     document.getElementById('logout-button').addEventListener('click', () => {
       localStorage.removeItem('isTeacherAuthenticated');
       window.location.href = 'teacher-login.html';
     });
+
+    // Modal logic for question entry
+    document.querySelector('.js-question-entry-button').onclick = function() {
+      document.getElementById('question-entry-modal').style.display = 'flex';
+    };
+    document.getElementById('close-question-entry').onclick = function() {
+      document.getElementById('question-entry-modal').style.display = 'none';
+    };
+    document.getElementById('question-entry-form').onsubmit = function(e) {
+      e.preventDefault();
+      const subject = document.getElementById('qe-subject').value;
+      const question = document.getElementById('qe-question').value;
+      const choiceA = document.getElementById('qe-a').value;
+      const choiceB = document.getElementById('qe-b').value;
+      const choiceC = document.getElementById('qe-c').value;
+      const choiceD = document.getElementById('qe-d').value;
+      const correct = document.getElementById('qe-correct').value.toUpperCase();
+      if (!['A', 'B', 'C', 'D'].includes(correct)) {
+        document.getElementById('qe-feedback').textContent = 'Correct answer must be A, B, C, or D.';
+        return;
+      }
+      ws.send(JSON.stringify({
+        type: 'addQuestion',
+        subject,
+        question: {
+          question, choiceA, choiceB, choiceC, choiceD, correct
+        }
+      }));
+      document.getElementById('qe-feedback').textContent = 'Question saved!';
+      this.reset();
+      setTimeout(() => {
+        document.getElementById('question-entry-modal').style.display = 'none';
+        document.getElementById('qe-feedback').textContent = '';
+      }, 1000);
+    };
   </script>
+  <style>
+    .modal {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10001;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 24px 18px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      min-width: 310px;
+      max-width: 360px;
+      width: 100%;
+      position: relative;
+    }
+  </style>
 </body>
 </html>
