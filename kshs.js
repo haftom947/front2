@@ -54,21 +54,33 @@ ws.onmessage = (event) => {
   }
 
   if (data.type === 'questionsForSubject') {
-    let html = `<h2>Questions for ${data.subject}</h2><ol>`;
-    data.questions.forEach((q, idx) => {
-      html += `<li>
-        <b>Q${idx+1}:</b> ${q.question}<br>
-        <span style="color:#1966c0">A.</span> ${q.choiceA || ""}<br>
-        <span style="color:#1966c0">B.</span> ${q.choiceB || ""}<br>
-        <span style="color:#1966c0">C.</span> ${q.choiceC || ""}<br>
-        <span style="color:#1966c0">D.</span> ${q.choiceD || ""}<br>
-        <span style="color:green"><b>Correct:</b> ${q.correct ? q.correct : "?"}</span>
-      </li><br>`;
+  // Populate the dropdown dynamically
+  const questionDropdown = document.getElementById('question-no');
+  if (questionDropdown) {
+    questionDropdown.innerHTML = ""; // Clear existing options
+    data.questions.forEach((_, idx) => {
+      const opt = document.createElement('option');
+      opt.value = "q" + (idx + 1);
+      opt.textContent = "Q" + (idx + 1);
+      questionDropdown.appendChild(opt);
     });
-    html += '</ol>';
-    showCustomOverlay(html);
   }
 
+  // Optionally, still show the overlay of questions for review
+  let html = `<h2>Questions for ${data.subject}</h2><ol>`;
+  data.questions.forEach((q, idx) => {
+    html += `<li>
+      <b>Q${idx+1}:</b> ${q.question}<br>
+      <span style="color:#1966c0">A.</span> ${q.choiceA || ""}<br>
+      <span style="color:#1966c0">B.</span> ${q.choiceB || ""}<br>
+      <span style="color:#1966c0">C.</span> ${q.choiceC || ""}<br>
+      <span style="color:#1966c0">D.</span> ${q.choiceD || ""}<br>
+      <span style="color:green"><b>Correct:</b> ${q.correct ? q.correct : "?"}</span>
+    </li><br>`;
+  });
+  html += '</ol>';
+  showCustomOverlay(html);
+}
   if (data.type === 'studentAnswered') {
     showTeacherOverlay({
       studentId: data.studentId,
@@ -88,8 +100,23 @@ ws.onmessage = (event) => {
     setTimeout(() => { document.getElementById('timer-feedback').textContent = ''; }, 2000);
   }
 };
+function populateQuestionDropdown(subject) {
+  // Request the list of questions for the subject
+  ws.send(JSON.stringify({ type: 'getQuestionsForSubject', subject }));
 
+  // The actual dropdown is repopulated in the 'questionsForSubject' message handler below
+}
+
+// Listen for subject change and repopulate the dropdown
+document.getElementById('subject').addEventListener('change', function () {
+  const subjectSelect = document.getElementById('subject');
+  let subjectKey = subjectSelect.value.charAt(0).toUpperCase() + subjectSelect.value.slice(1);
+  populateQuestionDropdown(subjectKey);
+});
 document.addEventListener('DOMContentLoaded', () => {
+  const subjectSelect = document.getElementById('subject');
+  let subjectKey = subjectSelect.value.charAt(0).toUpperCase() + subjectSelect.value.slice(1);
+  populateQuestionDropdown(subjectKey);
   document.getElementById('set-timer-btn').onclick = () => {
     const timerInput = parseInt(document.getElementById('global-timer-input').value, 10) || 180;
     ws.send(JSON.stringify({ type: 'setGlobalTimer', value: timerInput }));
