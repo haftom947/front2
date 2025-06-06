@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Question entry</title>
- <link rel="stylesheet" href="question-web.css">
+  <link rel="stylesheet" href="question-web.css">
 </head>
 <body>
   <script>
@@ -13,28 +13,23 @@
       window.location.href = 'teacher-login.html';
     }
   </script>
-<div class="main-container">
+  <div class="main-container">
 
-  <div class="question-writing">
-    <textarea class="js-text-area" name="q1" id="" placeholder="Enter your Question Here"></textarea>
-    <input class="choice-a" type="text" placeholder="Enter Choice A">
-    <input class="choice-b" type="text" placeholder="Enter Choice B">
-    <input class="choice-c" type="text" placeholder="Enter Choice C">
-    <input class="choice-d" type="text" placeholder="Enter Choice D">
-    <input class="correct-answer" type="text" placeholder="Enter Correct Answer (A, B, C, or D)">
-    <p class="max-questions-message" style="color: red; display: none;">Maximum of 12 questions reached. Cannot add more.</p>
-    <button class="save-question">Save Question</button>
-    <button class="reset-question js-reset-question">Reset Question</button>
+    <div class="question-writing">
+      <textarea class="js-text-area" name="q1" id="" placeholder="Enter your Question Here"></textarea>
+      <input class="choice-a" type="text" placeholder="Enter Choice A">
+      <input class="choice-b" type="text" placeholder="Enter Choice B">
+      <input class="choice-c" type="text" placeholder="Enter Choice C">
+      <input class="choice-d" type="text" placeholder="Enter Choice D">
+      <input class="correct-answer" type="text" placeholder="Enter Correct Answer (A, B, C, or D)">
+      <p class="max-questions-message" style="color: red; display: none;">Maximum of 12 questions reached. Cannot add more.</p>
+      <button class="save-question">Save Question</button>
+      <button class="reset-question js-reset-question">Reset Question</button>
+    </div>
+    
+    <!-- Force hard reload with cache busting -->
+    <button class="back-button" onclick="window.location.replace('teacher.html?reload=' + Date.now())">Back to Host</button>
   </div>
-  
-
-
-
-<button class="back-button" onclick="window.location.replace('teacher.html')">Back to Host</button>
-
-
-  
-</div>
   <script type="module" src="question-web.js"></script>
   <script>
     const subject = new URLSearchParams(window.location.search).get('subject');
