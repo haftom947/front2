@@ -79,9 +79,9 @@
       </div>
 
       <div class="question-selection">
-  <label for="question-no">Select Question</label>
-  <select id="question-no"></select>
-</div>
+        <label for="question-no">Select Question</label>
+        <select id="question-no"></select>
+      </div>
 
       <button class="send-button">Send Question</button>
       <div class="field-feedback" id="question-success"></div>
@@ -114,9 +114,16 @@
   </div>
 
   <script src="DayJS/dayjs.min.js"></script>
-  <script type="module" src="kshs.js"></script>
+  <script src="kshs.js"></script>
   <script>
-   
+    // Always reset overlays/modals on load to avoid stuck UI after back navigation
+    window.addEventListener('DOMContentLoaded', function() {
+      var overlay = document.getElementById('teacher-overlay');
+      if (overlay) overlay.style.display = 'none';
+      var entry = document.querySelector('.js-question-entry');
+      if (entry) entry.classList.remove('makeit-visible');
+    });
+
     document.getElementById('logout-button').addEventListener('click', () => {
       localStorage.removeItem('isTeacherAuthenticated');
       window.location.href = 'teacher-login.html';
