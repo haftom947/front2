@@ -18,6 +18,9 @@ let wsReady = false;
 let domReady = false;
 let initialized = false;
 
+// Control when to show the question overlay
+let showQuestionsOverlay = false;
+
 // --- Dynamic student selection ---
 function populateStudentDropdown(studentList) {
   const select = document.getElementById('select-student-id');
@@ -31,6 +34,11 @@ function populateStudentDropdown(studentList) {
   });
 }
 
+// --- Only populate the question dropdown when needed, never show overlay here ---
+function requestQuestionDropdown(subject) {
+  ws.send(JSON.stringify({ type: 'getQuestionsForSubject', subject }));
+}
+
 function initializeUI() {
   if (!wsReady || !domReady || initialized) return;
   initialized = true;
@@ -38,18 +46,9 @@ function initializeUI() {
   // Request latest students for the dropdown (also after registration)
   ws.send(JSON.stringify({ type: 'getAllStudents' }));
 
-  // Subject/question dropdown dynamic
-  const subjectSelect = document.getElementById('subject');
-  if (subjectSelect) {
-    let subjectKey = subjectSelect.value.charAt(0).toUpperCase() + subjectSelect.value.slice(1);
-    populateQuestionDropdown(subjectKey);
-    subjectSelect.addEventListener('change', function () {
-      if (wsReady) {
-        let subjectKey = subjectSelect.value.charAt(0).toUpperCase() + subjectSelect.value.slice(1);
-        populateQuestionDropdown(subjectKey);
-      }
-    });
-  }
+  // --- Remove subject change event for auto question loading! ---
+  // Instead, populate question dropdown only when "Send Question" is needed (before sending)
+  // (So we fetch on subject selection for send, but only update dropdown, not overlay/content)
 
   const setTimerBtn = document.getElementById('set-timer-btn');
   if (setTimerBtn) {
@@ -67,6 +66,7 @@ function initializeUI() {
   const getStudentsBtn = document.getElementById('get-students-button');
   if (getStudentsBtn) {
     getStudentsBtn.onclick = () => {
+      window.triggeredShowAllStudents = true;
       ws.send(JSON.stringify({ type: 'getAllStudents' }));
     };
   }
@@ -96,6 +96,7 @@ function initializeUI() {
       const questionTypeSelection = document.getElementById('question-type-selection');
       if (questionTypeSelect) {
         const subject = questionTypeSelect.value;
+        showQuestionsOverlay = true; // <-- Only for this call!
         ws.send(JSON.stringify({
           type: 'getQuestionsForSubject',
           subject
@@ -137,17 +138,30 @@ function initializeUI() {
       ws.send(JSON.stringify({ type: 'getAllStudents' }));
     };
   }
+  const subjectSelect = document.getElementById('subject');
+  if (subjectSelect) {
+    subjectSelect.addEventListener('change', function () {
+      // Only populate the question dropdown, do not show overlay/content
+      if (wsReady) {
+        let subjectKey = subjectSelect.value.charAt(0).toUpperCase() + subjectSelect.value.slice(1);
+        requestQuestionDropdown(subjectKey);
+      }
+    });
+  }
   const sendButton = document.querySelector('.send-button');
   if (sendButton) {
     sendButton.addEventListener('click', () => {
       const selectedStudentId = document.getElementById('select-student-id')?.value;
-      const selectedSubject = document.getElementById('subject')?.value;
+      const subjectSelectEl = document.getElementById('subject');
+      const selectedSubject = subjectSelectEl?.value;
       const selectedQuestionIndex = document.getElementById('question-no')?.value;
       if (!selectedStudentId || !selectedSubject || !selectedQuestionIndex) {
         alert("Missing student, subject or question selection.");
         return;
       }
       const subjectKey = selectedSubject.charAt(0).toUpperCase() + selectedSubject.slice(1);
+      // Always ensure dropdown is fresh before sending (could be improved with caching)
+      requestQuestionDropdown(subjectKey);
       const questionIndex = parseInt(selectedQuestionIndex.replace('q', '')) - 1;
       ws.send(JSON.stringify({
         type: 'sendQuestion',
@@ -230,6 +244,7 @@ ws.onmessage = (event) => {
   }
 
   if (data.type === 'questionsForSubject') {
+    // Always update the question dropdown (but only show overlay if requested)
     const questionDropdown = document.getElementById('question-no');
     if (questionDropdown) {
       questionDropdown.innerHTML = "";
@@ -240,19 +255,23 @@ ws.onmessage = (event) => {
         questionDropdown.appendChild(opt);
       });
     }
-    let html = `<h2>Questions for ${data.subject}</h2><ol>`;
-    data.questions.forEach((q, idx) => {
-      html += `<li>
-        <b>Q${idx+1}:</b> ${q.question}<br>
-        <span style="color:#1966c0">A.</span> ${q.choiceA || ""}<br>
-        <span style="color:#1966c0">B.</span> ${q.choiceB || ""}<br>
-        <span style="color:#1966c0">C.</span> ${q.choiceC || ""}<br>
-        <span style="color:#1966c0">D.</span> ${q.choiceD || ""}<br>
-        <span style="color:green"><b>Correct:</b> ${q.correct ? q.correct : "?"}</span>
-      </li><br>`;
-    });
-    html += '</ol>';
-    showCustomOverlay(html);
+    // Only show overlay if we just wanted to DISPLAY the questions
+    if (showQuestionsOverlay) {
+      let html = `<h2>Questions for ${data.subject}</h2><ol>`;
+      data.questions.forEach((q, idx) => {
+        html += `<li>
+          <b>Q${idx+1}:</b> ${q.question}<br>
+          <span style="color:#1966c0">A.</span> ${q.choiceA || ""}<br>
+          <span style="color:#1966c0">B.</span> ${q.choiceB || ""}<br>
+          <span style="color:#1966c0">C.</span> ${q.choiceC || ""}<br>
+          <span style="color:#1966c0">D.</span> ${q.choiceD || ""}<br>
+          <span style="color:green"><b>Correct:</b> ${q.correct ? q.correct : "?"}</span>
+        </li><br>`;
+      });
+      html += '</ol>';
+      showCustomOverlay(html);
+      showQuestionsOverlay = false;
+    }
   }
 
   if (data.type === 'studentAnswered') {
@@ -278,10 +297,6 @@ ws.onmessage = (event) => {
     }
   }
 };
-
-function populateQuestionDropdown(subject) {
-  ws.send(JSON.stringify({ type: 'getQuestionsForSubject', subject }));
-}
 
 function showTeacherOverlay({ studentId, question, choiceA, choiceB, choiceC, choiceD, answer, feedback }) {
   let overlay = document.getElementById('teacher-overlay');
@@ -348,9 +363,3 @@ function showSuccessMessage(id, message, timeout = 2200) {
   clearTimeout(el._timeout);
   el._timeout = setTimeout(() => { el.textContent = ''; }, timeout);
 }
-
-// --- For show all students overlay (avoid double overlays on every getAllStudents)
-document.getElementById('get-students-button').addEventListener('click', function() {
-  window.triggeredShowAllStudents = true;
-  ws.send(JSON.stringify({ type: 'getAllStudents' }));
-});
