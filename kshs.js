@@ -9,8 +9,8 @@ window.addEventListener("pageshow", function (event) {
 window.addEventListener('DOMContentLoaded', function() {
   var overlay = document.getElementById('teacher-overlay');
   if (overlay) overlay.style.display = 'none';
-  var entry = document.querySelector('.js-question-entry');
-  if (entry) entry.classList.remove('makeit-visible');
+  var entry = document.getElementById('question-entry-modal');
+  if (entry) entry.style.display = 'none';
 });
 
 const ws = new WebSocket('wss://kshs-quiz1.onrender.com');
@@ -18,18 +18,13 @@ let wsReady = false;
 let domReady = false;
 let initialized = false;
 
-// ---------- MAIN UI LOGIC: Everything DOM-dependent is here, guarded ----------
 function initializeUI() {
-  // Only run once, and only when both DOM and websocket are ready
   if (!wsReady || !domReady || initialized) return;
   initialized = true;
-
-  // Initial population for question dropdown
   const subjectSelect = document.getElementById('subject');
   if (subjectSelect) {
     let subjectKey = subjectSelect.value.charAt(0).toUpperCase() + subjectSelect.value.slice(1);
     populateQuestionDropdown(subjectKey);
-
     subjectSelect.addEventListener('change', function () {
       if (wsReady) {
         let subjectKey = subjectSelect.value.charAt(0).toUpperCase() + subjectSelect.value.slice(1);
@@ -37,7 +32,6 @@ function initializeUI() {
       }
     });
   }
-
   const setTimerBtn = document.getElementById('set-timer-btn');
   if (setTimerBtn) {
     setTimerBtn.onclick = () => {
@@ -51,28 +45,24 @@ function initializeUI() {
       }
     };
   }
-
   const getStudentsBtn = document.getElementById('get-students-button');
   if (getStudentsBtn) {
     getStudentsBtn.onclick = () => {
       ws.send(JSON.stringify({ type: 'getAllStudents' }));
     };
   }
-
   const showAllScoresBtn = document.getElementById('show-all-scores-btn');
   if (showAllScoresBtn) {
     showAllScoresBtn.onclick = () => {
       ws.send(JSON.stringify({ type: 'getAllStudentScores' }));
     };
   }
-
   const showAllPasswordsBtn = document.getElementById('show-all-passwords-btn');
   if (showAllPasswordsBtn) {
     showAllPasswordsBtn.onclick = () => {
       ws.send(JSON.stringify({ type: 'getAllStudentPasswords' }));
     };
   }
-
   const getQuestionsBtn = document.getElementById('get-questions-button');
   if (getQuestionsBtn) {
     getQuestionsBtn.onclick = () => {
@@ -80,7 +70,6 @@ function initializeUI() {
       if (questionTypeSelection) questionTypeSelection.style.display = 'block';
     };
   }
-
   const confirmTypeBtn = document.getElementById('confirm-type-button');
   if (confirmTypeBtn) {
     confirmTypeBtn.onclick = () => {
@@ -96,7 +85,6 @@ function initializeUI() {
       if (questionTypeSelection) questionTypeSelection.style.display = 'none';
     };
   }
-
   const registerBtn = document.querySelector('.js-register-button');
   if (registerBtn) {
     registerBtn.onclick = () => {
@@ -119,7 +107,6 @@ function initializeUI() {
       document.querySelector('.student-password').value = '';
     };
   }
-
   const removeBtn = document.querySelector('.js-remove-button');
   if (removeBtn) {
     removeBtn.onclick = () => {
@@ -127,7 +114,6 @@ function initializeUI() {
       alert('All student data has been reset.');
     };
   }
-
   const sendButton = document.querySelector('.send-button');
   if (sendButton) {
     sendButton.addEventListener('click', () => {
@@ -149,33 +135,13 @@ function initializeUI() {
       showSuccessMessage('question-success', `Question sent to student ID: ${selectedStudentId}`);
     });
   }
-
-  // Show/hide question entry "modal" (actually triggers page navigation)
-  const questionEntryBtn = document.querySelector('.js-question-entry-button');
-  if (questionEntryBtn) {
-    questionEntryBtn.onclick = () => {
-      document.querySelector('.js-question-entry')?.classList.add('makeit-visible');
-    };
-  }
-
-  const subjectQuestionSelect = document.getElementById('subject-question');
-  if (subjectQuestionSelect) {
-    subjectQuestionSelect.onchange = () => {
-      const val = subjectQuestionSelect.value;
-      if (val && val !== 'nothing') {
-        window.location.href = `question-web.html?subject=${encodeURIComponent(val)}`;
-      }
-    };
-  }
 }
 
-// Mark domReady and try to initialize
 document.addEventListener('DOMContentLoaded', () => {
   domReady = true;
   initializeUI();
 });
 
-// Mark wsReady and try to initialize
 ws.onopen = () => {
   ws.send(JSON.stringify({ type: "registerTeacher" }));
   wsReady = true;
@@ -232,10 +198,9 @@ ws.onmessage = (event) => {
   }
 
   if (data.type === 'questionsForSubject') {
-    // Populate the dropdown dynamically
     const questionDropdown = document.getElementById('question-no');
     if (questionDropdown) {
-      questionDropdown.innerHTML = ""; // Clear existing options
+      questionDropdown.innerHTML = "";
       data.questions.forEach((_, idx) => {
         const opt = document.createElement('option');
         opt.value = "q" + (idx + 1);
@@ -243,8 +208,6 @@ ws.onmessage = (event) => {
         questionDropdown.appendChild(opt);
       });
     }
-
-    // Optionally, still show the overlay of questions for review
     let html = `<h2>Questions for ${data.subject}</h2><ol>`;
     data.questions.forEach((q, idx) => {
       html += `<li>
