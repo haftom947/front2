@@ -1,15 +1,178 @@
- window.addEventListener("pageshow", function (event) {
+// Always reload if coming from bfcache (browser back/forward cache)
+window.addEventListener("pageshow", function (event) {
   if (event.persisted) {
     window.location.reload();
   }
 });
-const ws = new WebSocket('wss://kshs-quiz1.onrender.com'); // Use your actual PC IP
 
+const ws = new WebSocket('wss://kshs-quiz1.onrender.com');
+let wsReady = false;
+let domReady = false;
+let initialized = false;
+
+// ---------- MAIN UI LOGIC: Everything DOM-dependent is here, guarded ----------
+function initializeUI() {
+  // Only run once, and only when both DOM and websocket are ready
+  if (!wsReady || !domReady || initialized) return;
+  initialized = true;
+
+  // Initial population for question dropdown
+  const subjectSelect = document.getElementById('subject');
+  if (subjectSelect) {
+    let subjectKey = subjectSelect.value.charAt(0).toUpperCase() + subjectSelect.value.slice(1);
+    populateQuestionDropdown(subjectKey);
+
+    subjectSelect.addEventListener('change', function () {
+      // Only fire if ws is actually open!
+      if (wsReady) {
+        let subjectKey = subjectSelect.value.charAt(0).toUpperCase() + subjectSelect.value.slice(1);
+        populateQuestionDropdown(subjectKey);
+      }
+    });
+  }
+
+  const setTimerBtn = document.getElementById('set-timer-btn');
+  if (setTimerBtn) {
+    setTimerBtn.onclick = () => {
+      const timerInputEl = document.getElementById('global-timer-input');
+      const feedbackEl = document.getElementById('timer-feedback');
+      const timerInput = parseInt(timerInputEl && timerInputEl.value, 10) || 180;
+      ws.send(JSON.stringify({ type: 'setGlobalTimer', value: timerInput }));
+      if (feedbackEl) {
+        feedbackEl.textContent = 'Timer set to ' + timerInput + ' seconds.';
+        setTimeout(() => { feedbackEl.textContent = ''; }, 2000);
+      }
+    };
+  }
+
+  const getStudentsBtn = document.getElementById('get-students-button');
+  if (getStudentsBtn) {
+    getStudentsBtn.onclick = () => {
+      ws.send(JSON.stringify({ type: 'getAllStudents' }));
+    };
+  }
+
+  const showAllScoresBtn = document.getElementById('show-all-scores-btn');
+  if (showAllScoresBtn) {
+    showAllScoresBtn.onclick = () => {
+      ws.send(JSON.stringify({ type: 'getAllStudentScores' }));
+    };
+  }
+
+  const showAllPasswordsBtn = document.getElementById('show-all-passwords-btn');
+  if (showAllPasswordsBtn) {
+    showAllPasswordsBtn.onclick = () => {
+      ws.send(JSON.stringify({ type: 'getAllStudentPasswords' }));
+    };
+  }
+
+  const getQuestionsBtn = document.getElementById('get-questions-button');
+  if (getQuestionsBtn) {
+    getQuestionsBtn.onclick = () => {
+      const questionTypeSelection = document.getElementById('question-type-selection');
+      if (questionTypeSelection) questionTypeSelection.style.display = 'block';
+    };
+  }
+
+  const confirmTypeBtn = document.getElementById('confirm-type-button');
+  if (confirmTypeBtn) {
+    confirmTypeBtn.onclick = () => {
+      const questionTypeSelect = document.getElementById('question-type');
+      const questionTypeSelection = document.getElementById('question-type-selection');
+      if (questionTypeSelect) {
+        const subject = questionTypeSelect.value;
+        ws.send(JSON.stringify({
+          type: 'getQuestionsForSubject',
+          subject
+        }));
+      }
+      if (questionTypeSelection) questionTypeSelection.style.display = 'none';
+    };
+  }
+
+  const registerBtn = document.querySelector('.js-register-button');
+  if (registerBtn) {
+    registerBtn.onclick = () => {
+      const stdName = document.querySelector('.student-name')?.value.trim();
+      const stdId = document.querySelector('.student-id')?.value.trim();
+      const stdPassword = document.querySelector('.student-password')?.value.trim();
+      if (!stdName || !stdId || !stdPassword) {
+        alert('Please fill in all the fields before registering.');
+        return;
+      }
+      ws.send(JSON.stringify({
+        type: 'register',
+        studentName: stdName,
+        studentId: stdId,
+        studentPassword: stdPassword,
+      }));
+      showSuccessMessage('register-success', `Student ${stdName} registered successfully.`);
+      document.querySelector('.student-name').value = '';
+      document.querySelector('.student-id').value = '';
+      document.querySelector('.student-password').value = '';
+    };
+  }
+
+  const removeBtn = document.querySelector('.js-remove-button');
+  if (removeBtn) {
+    removeBtn.onclick = () => {
+      ws.send(JSON.stringify({ type: 'resetStudents' }));
+      alert('All student data has been reset.');
+    };
+  }
+
+  const sendButton = document.querySelector('.send-button');
+  if (sendButton) {
+    sendButton.addEventListener('click', () => {
+      const selectedStudentId = document.getElementById('student-id')?.value;
+      const selectedSubject = document.getElementById('subject')?.value;
+      const selectedQuestionIndex = document.getElementById('question-no')?.value;
+      if (!selectedStudentId || !selectedSubject || !selectedQuestionIndex) {
+        alert("Missing student, subject or question selection.");
+        return;
+      }
+      const subjectKey = selectedSubject.charAt(0).toUpperCase() + selectedSubject.slice(1);
+      const questionIndex = parseInt(selectedQuestionIndex.replace('q', '')) - 1;
+      ws.send(JSON.stringify({
+        type: 'sendQuestion',
+        studentId: selectedStudentId,
+        subject: subjectKey,
+        questionIndex: questionIndex
+      }));
+      showSuccessMessage('question-success', `Question sent to student ID: ${selectedStudentId}`);
+    });
+  }
+
+  // Show/hide question entry "modal" (actually triggers page navigation)
+  const questionEntryBtn = document.querySelector('.js-question-entry-button');
+  if (questionEntryBtn) {
+    questionEntryBtn.onclick = () => {
+      document.querySelector('.js-question-entry')?.classList.add('makeit-visible');
+    };
+  }
+
+  const subjectQuestionSelect = document.getElementById('subject-question');
+  if (subjectQuestionSelect) {
+    subjectQuestionSelect.onchange = () => {
+      const val = subjectQuestionSelect.value;
+      if (val && val !== 'nothing') {
+        window.location.href = `question-web.html?subject=${encodeURIComponent(val)}`;
+      }
+    };
+  }
+}
+
+// Mark domReady and try to initialize
+document.addEventListener('DOMContentLoaded', () => {
+  domReady = true;
+  initializeUI();
+});
+
+// Mark wsReady and try to initialize
 ws.onopen = () => {
   ws.send(JSON.stringify({ type: "registerTeacher" }));
-  const subjectSelect = document.getElementById('subject');
-  let subjectKey = subjectSelect.value.charAt(0).toUpperCase() + subjectSelect.value.slice(1);
-  populateQuestionDropdown(subjectKey);
+  wsReady = true;
+  initializeUI();
 };
 
 ws.onmessage = (event) => {
@@ -50,7 +213,7 @@ ws.onmessage = (event) => {
       choiceC: data.choiceC,
       choiceD: data.choiceD
     });
-  } // <-- THIS IS THE FIX
+  }
 
   if (data.type === 'allStudents') {
     let html = `<h2>Registered Students</h2><ul>`;
@@ -62,33 +225,34 @@ ws.onmessage = (event) => {
   }
 
   if (data.type === 'questionsForSubject') {
-  // Populate the dropdown dynamically
-  const questionDropdown = document.getElementById('question-no');
-  if (questionDropdown) {
-    questionDropdown.innerHTML = ""; // Clear existing options
-    data.questions.forEach((_, idx) => {
-      const opt = document.createElement('option');
-      opt.value = "q" + (idx + 1);
-      opt.textContent = "Q" + (idx + 1);
-      questionDropdown.appendChild(opt);
+    // Populate the dropdown dynamically
+    const questionDropdown = document.getElementById('question-no');
+    if (questionDropdown) {
+      questionDropdown.innerHTML = ""; // Clear existing options
+      data.questions.forEach((_, idx) => {
+        const opt = document.createElement('option');
+        opt.value = "q" + (idx + 1);
+        opt.textContent = "Q" + (idx + 1);
+        questionDropdown.appendChild(opt);
+      });
+    }
+
+    // Optionally, still show the overlay of questions for review
+    let html = `<h2>Questions for ${data.subject}</h2><ol>`;
+    data.questions.forEach((q, idx) => {
+      html += `<li>
+        <b>Q${idx+1}:</b> ${q.question}<br>
+        <span style="color:#1966c0">A.</span> ${q.choiceA || ""}<br>
+        <span style="color:#1966c0">B.</span> ${q.choiceB || ""}<br>
+        <span style="color:#1966c0">C.</span> ${q.choiceC || ""}<br>
+        <span style="color:#1966c0">D.</span> ${q.choiceD || ""}<br>
+        <span style="color:green"><b>Correct:</b> ${q.correct ? q.correct : "?"}</span>
+      </li><br>`;
     });
+    html += '</ol>';
+    showCustomOverlay(html);
   }
 
-  // Optionally, still show the overlay of questions for review
-  let html = `<h2>Questions for ${data.subject}</h2><ol>`;
-  data.questions.forEach((q, idx) => {
-    html += `<li>
-      <b>Q${idx+1}:</b> ${q.question}<br>
-      <span style="color:#1966c0">A.</span> ${q.choiceA || ""}<br>
-      <span style="color:#1966c0">B.</span> ${q.choiceB || ""}<br>
-      <span style="color:#1966c0">C.</span> ${q.choiceC || ""}<br>
-      <span style="color:#1966c0">D.</span> ${q.choiceD || ""}<br>
-      <span style="color:green"><b>Correct:</b> ${q.correct ? q.correct : "?"}</span>
-    </li><br>`;
-  });
-  html += '</ol>';
-  showCustomOverlay(html);
-}
   if (data.type === 'studentAnswered') {
     showTeacherOverlay({
       studentId: data.studentId,
@@ -103,111 +267,20 @@ ws.onmessage = (event) => {
   }
 
   if (data.type === 'currentTimerValue') {
-    document.getElementById('global-timer-input').value = data.value;
-    document.getElementById('timer-feedback').textContent = 'Timer set to ' + data.value + ' seconds.';
-    setTimeout(() => { document.getElementById('timer-feedback').textContent = ''; }, 2000);
-  }
-};
-function populateQuestionDropdown(subject) {
-  // Request the list of questions for the subject
-  ws.send(JSON.stringify({ type: 'getQuestionsForSubject', subject }));
-
-  // The actual dropdown is repopulated in the 'questionsForSubject' message handler below
-}
-
-// Listen for subject change and repopulate the dropdown
-document.getElementById('subject').addEventListener('change', function () {
-  const subjectSelect = document.getElementById('subject');
-  let subjectKey = subjectSelect.value.charAt(0).toUpperCase() + subjectSelect.value.slice(1);
-  populateQuestionDropdown(subjectKey);
-});
-document.addEventListener('DOMContentLoaded', () => {
-  
-  document.getElementById('set-timer-btn').onclick = () => {
-    const timerInput = parseInt(document.getElementById('global-timer-input').value, 10) || 180;
-    ws.send(JSON.stringify({ type: 'setGlobalTimer', value: timerInput }));
-    document.getElementById('timer-feedback').textContent = 'Timer set to ' + timerInput + ' seconds.';
-    setTimeout(() => { document.getElementById('timer-feedback').textContent = ''; }, 2000);
-  };
-
-  document.getElementById('get-students-button').onclick = () => {
-    ws.send(JSON.stringify({ type: 'getAllStudents' }));
-  };
-
-  document.getElementById('show-all-scores-btn').onclick = () => {
-    ws.send(JSON.stringify({ type: 'getAllStudentScores' }));
-  };
-  document.getElementById('show-all-passwords-btn').onclick = () => {
-    ws.send(JSON.stringify({ type: 'getAllStudentPasswords' }));
-  };
-
-  document.getElementById('get-questions-button').onclick = () => {
-    document.getElementById('question-type-selection').style.display = 'block';
-  };
-
-  document.getElementById('confirm-type-button').onclick = () => {
-    const subject = document.getElementById('question-type').value;
-    ws.send(JSON.stringify({
-      type: 'getQuestionsForSubject',
-      subject
-    }));
-    document.getElementById('question-type-selection').style.display = 'none';
-  };
-
-  document.querySelector('.js-register-button').onclick = () => {
-  let stdName = document.querySelector('.student-name').value.trim();
-  let stdId = document.querySelector('.student-id').value.trim();
-  let stdPassword = document.querySelector('.student-password').value.trim();
-  if (!stdName || !stdId || !stdPassword) {
-    alert('Please fill in all the fields before registering.');
-    return;
-  }
-  ws.send(JSON.stringify({
-    type: 'register',
-    studentName: stdName,
-    studentId: stdId,
-    studentPassword: stdPassword,
-  }));
-  showSuccessMessage('register-success', `Student ${stdName} registered successfully.`);
-  document.querySelector('.student-name').value = '';
-  document.querySelector('.student-id').value = '';
-  document.querySelector('.student-password').value = '';
-};
-
-  document.querySelector('.js-remove-button').onclick = () => {
-    ws.send(JSON.stringify({ type: 'resetStudents' }));
-    alert('All student data has been reset.');
-  };
-
- const sendButton = document.querySelector('.send-button');
-if (sendButton) {
-  sendButton.addEventListener('click', () => {
-    const selectedStudentId = document.getElementById('student-id').value;
-    const selectedSubject = document.getElementById('subject').value;
-    const selectedQuestionIndex = document.getElementById('question-no').value;
-    const subjectKey = selectedSubject.charAt(0).toUpperCase() + selectedSubject.slice(1);
-    const questionIndex = parseInt(selectedQuestionIndex.replace('q', '')) - 1;
-    ws.send(JSON.stringify({
-      type: 'sendQuestion',
-      studentId: selectedStudentId,
-      subject: subjectKey,
-      questionIndex: questionIndex
-    }));
-    showSuccessMessage('question-success', `Question sent to student ID: ${selectedStudentId}`);
-  });
-}
-
-  // Show/hide question entry modal
-  document.querySelector('.js-question-entry-button').onclick = () => {
-    document.querySelector('.js-question-entry').classList.add('makeit-visible');
-  };
-  document.getElementById('subject-question').onchange = () => {
-    const val = document.getElementById('subject-question').value;
-    if (val && val !== 'nothing') {
-      window.location.href = `question-web.html?subject=${encodeURIComponent(val)}`;
+    const timerInputEl = document.getElementById('global-timer-input');
+    const feedbackEl = document.getElementById('timer-feedback');
+    if (timerInputEl) timerInputEl.value = data.value;
+    if (feedbackEl) {
+      feedbackEl.textContent = 'Timer set to ' + data.value + ' seconds.';
+      setTimeout(() => { feedbackEl.textContent = ''; }, 2000);
     }
-  };
-});
+  }
+};
+
+function populateQuestionDropdown(subject) {
+  ws.send(JSON.stringify({ type: 'getQuestionsForSubject', subject }));
+  // The actual dropdown is repopulated in the 'questionsForSubject' message handler above
+}
 
 // Overlay/modal functions
 function showTeacherOverlay({ studentId, question, choiceA, choiceB, choiceC, choiceD, answer, feedback }) {
@@ -241,6 +314,7 @@ function showTeacherOverlay({ studentId, question, choiceA, choiceB, choiceC, ch
     overlay.style.display = 'none';
   };
 }
+
 function showCustomOverlay(html) {
   let overlay = document.getElementById('teacher-overlay');
   if (!overlay) {
@@ -254,7 +328,6 @@ function showCustomOverlay(html) {
     overlay.style.zIndex = 1000;
     overlay.style.maxWidth = '700px';
     overlay.style.width = '90%';
-    // don't append overlay to any container that holds your main controls!
     document.body.appendChild(overlay);
   }
   overlay.innerHTML = `
@@ -266,6 +339,7 @@ function showCustomOverlay(html) {
     overlay.style.display = 'none';
   };
 }
+
 function showSuccessMessage(id, message, timeout = 2200) {
   const el = document.getElementById(id);
   if (!el) return;
