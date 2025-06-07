@@ -11,7 +11,37 @@ window.addEventListener('DOMContentLoaded', function() {
   if (overlay) overlay.style.display = 'none';
   var entry = document.getElementById('question-entry-modal');
   if (entry) entry.style.display = 'none';
+
+  // --- Add fullscreen-on-doubleclick to modals ---
+  addFullscreenOnDblClick(overlay);
+  addFullscreenOnDblClick(entry);
 });
+
+// --- Fullscreen helper functions ---
+function requestFullScreen(element) {
+  if (!element) return;
+  if (element.requestFullscreen) {
+    element.requestFullscreen();
+  } else if (element.webkitRequestFullscreen) {
+    element.webkitRequestFullscreen();
+  } else if (element.msRequestFullscreen) {
+    element.msRequestFullscreen();
+  }
+}
+
+function addFullscreenOnDblClick(modal) {
+  if (!modal) return;
+  // Avoid adding multiple listeners
+  if (!modal._fullscreenListenerAdded) {
+    modal.addEventListener('dblclick', function(e) {
+      // Only trigger when background is double-clicked
+      if (e.target === modal) {
+        requestFullScreen(modal);
+      }
+    });
+    modal._fullscreenListenerAdded = true;
+  }
+}
 
 const ws = new WebSocket('wss://kshs-quiz1.onrender.com');
 let wsReady = false;
@@ -305,6 +335,9 @@ function showTeacherOverlay({ studentId, question, choiceA, choiceB, choiceC, ch
     overlay.id = 'teacher-overlay';
     document.body.appendChild(overlay);
   }
+  // Make sure fullscreen double-click is always enabled!
+  addFullscreenOnDblClick(overlay);
+
   let feedbackHtml = "";
   if (feedback) {
     const isCorrect = feedback.trim().toLowerCase().startsWith('correct');
@@ -322,6 +355,9 @@ function showTeacherOverlay({ studentId, question, choiceA, choiceB, choiceC, ch
     </div>
     ${answer ? `<div class="answer-row"><b>Submitted Answer:</b> ${answer}</div>` : ''}
     ${feedbackHtml}
+    <div style="font-size:0.85em;color:#888;margin-top:10px;text-align:center;">
+      Double-click the modal background to enter fullscreen.
+    </div>
     <button class="close-btn" id="teacher-overlay-close">Close</button>
   `;
   overlay.style.display = 'block';
@@ -345,8 +381,14 @@ function showCustomOverlay(html) {
     overlay.style.width = '90%';
     document.body.appendChild(overlay);
   }
+  // Make sure fullscreen double-click is always enabled!
+  addFullscreenOnDblClick(overlay);
+
   overlay.innerHTML = `
     ${html}
+    <div style="font-size:0.85em;color:#888;margin-top:10px;text-align:center;">
+      Double-click the modal background to enter fullscreen.
+    </div>
     <button class="close-btn" id="teacher-overlay-close">Close</button>
   `;
   overlay.style.display = 'block';
