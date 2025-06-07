@@ -112,6 +112,9 @@
           <button type="submit" class="qe-save-btn">Save Question</button>
         </form>
         <div id="qe-feedback" class="qe-feedback"></div>
+        <div style="font-size:0.85em;color:#888;margin-top:10px;text-align:center;">
+          Double-click the modal background to enter fullscreen.
+        </div>
       </div>
     </div>
 
@@ -131,6 +134,27 @@
       if (overlay) overlay.style.display = 'none';
       var entry = document.getElementById('question-entry-modal');
       if (entry) entry.style.display = 'none';
+
+      // --- START: Fullscreen on double-click modal background ---
+      function requestFullScreen(element) {
+        if (element.requestFullscreen) {
+          element.requestFullscreen();
+        } else if (element.webkitRequestFullscreen) {
+          element.webkitRequestFullscreen();
+        } else if (element.msRequestFullscreen) {
+          element.msRequestFullscreen();
+        }
+      }
+      var qeModal = document.getElementById('question-entry-modal');
+      if (qeModal) {
+        qeModal.addEventListener('dblclick', function(e) {
+          // Only enter fullscreen if clicking on the modal background, not content
+          if (e.target === qeModal) {
+            requestFullScreen(qeModal);
+          }
+        });
+      }
+      // --- END: Fullscreen on double-click modal background ---
     });
 
     document.getElementById('logout-button').addEventListener('click', () => {
