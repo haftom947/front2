@@ -15,6 +15,7 @@ window.addEventListener('DOMContentLoaded', function() {
   // --- Add fullscreen-on-doubleclick to modals ---
   addFullscreenOnDblClick(overlay);
   addFullscreenOnDblClick(entry);
+  setupFullscreenFontHandler();
 });
 
 // --- Fullscreen helper functions ---
@@ -29,17 +30,66 @@ function requestFullScreen(element) {
   }
 }
 
+function exitFullScreen() {
+  if (document.fullscreenElement) {
+    document.exitFullscreen();
+  } else if (document.webkitFullscreenElement) {
+    document.webkitExitFullscreen();
+  } else if (document.msFullscreenElement) {
+    document.msExitFullscreen();
+  }
+}
+window.exitFullScreen = exitFullScreen; // Make available to teacher.html
+
 function addFullscreenOnDblClick(modal) {
   if (!modal) return;
-  // Avoid adding multiple listeners
   if (!modal._fullscreenListenerAdded) {
     modal.addEventListener('dblclick', function(e) {
-      // Only trigger when background is double-clicked
       if (e.target === modal) {
         requestFullScreen(modal);
       }
     });
     modal._fullscreenListenerAdded = true;
+  }
+}
+
+// --- Font size increase in fullscreen ---
+function setupFullscreenFontHandler() {
+  document.addEventListener('fullscreenchange', function() {
+    handleFullscreenFont();
+  });
+  document.addEventListener('webkitfullscreenchange', function() {
+    handleFullscreenFont();
+  });
+  document.addEventListener('msfullscreenchange', function() {
+    handleFullscreenFont();
+  });
+}
+
+function handleFullscreenFont() {
+  // teacher-overlay
+  let overlay = document.getElementById('teacher-overlay');
+  if (overlay) {
+    if (document.fullscreenElement === overlay || document.webkitFullscreenElement === overlay || document.msFullscreenElement === overlay) {
+      overlay.classList.add('fullscreen-font');
+      let card = overlay.querySelector('.card, .qe-modal-content');
+      if (card) card.classList.add('fullscreen-font');
+    } else {
+      overlay.classList.remove('fullscreen-font');
+      let card = overlay.querySelector('.card, .qe-modal-content');
+      if (card) card.classList.remove('fullscreen-font');
+    }
+  }
+  // question-entry-modal
+  let modal = document.getElementById('question-entry-modal');
+  if (modal) {
+    if (document.fullscreenElement === modal || document.webkitFullscreenElement === modal || document.msFullscreenElement === modal) {
+      let content = modal.querySelector('.qe-modal-content');
+      if (content) content.classList.add('fullscreen-font');
+    } else {
+      let content = modal.querySelector('.qe-modal-content');
+      if (content) content.classList.remove('fullscreen-font');
+    }
   }
 }
 
@@ -73,12 +123,7 @@ function initializeUI() {
   if (!wsReady || !domReady || initialized) return;
   initialized = true;
 
-  // Request latest students for the dropdown (also after registration)
   ws.send(JSON.stringify({ type: 'getAllStudents' }));
-
-  // --- Remove subject change event for auto question loading! ---
-  // Instead, populate question dropdown only when "Send Question" is needed (before sending)
-  // (So we fetch on subject selection for send, but only update dropdown, not overlay/content)
 
   const setTimerBtn = document.getElementById('set-timer-btn');
   if (setTimerBtn) {
@@ -126,7 +171,7 @@ function initializeUI() {
       const questionTypeSelection = document.getElementById('question-type-selection');
       if (questionTypeSelect) {
         const subject = questionTypeSelect.value;
-        showQuestionsOverlay = true; // <-- Only for this call!
+        showQuestionsOverlay = true;
         ws.send(JSON.stringify({
           type: 'getQuestionsForSubject',
           subject
@@ -155,7 +200,6 @@ function initializeUI() {
       document.querySelector('.student-name').value = '';
       document.getElementById('register-student-id').value = '';
       document.querySelector('.student-password').value = '';
-      // --- Request updated student list right after registration
       ws.send(JSON.stringify({ type: 'getAllStudents' }));
     };
   }
@@ -164,14 +208,12 @@ function initializeUI() {
     removeBtn.onclick = () => {
       ws.send(JSON.stringify({ type: 'resetStudents' }));
       alert('All student data has been reset.');
-      // --- Request updated student list after reset
       ws.send(JSON.stringify({ type: 'getAllStudents' }));
     };
   }
   const subjectSelect = document.getElementById('subject');
   if (subjectSelect) {
     subjectSelect.addEventListener('change', function () {
-      // Only populate the question dropdown, do not show overlay/content
       if (wsReady) {
         let subjectKey = subjectSelect.value.charAt(0).toUpperCase() + subjectSelect.value.slice(1);
         requestQuestionDropdown(subjectKey);
@@ -190,7 +232,6 @@ function initializeUI() {
         return;
       }
       const subjectKey = selectedSubject.charAt(0).toUpperCase() + selectedSubject.slice(1);
-      // Always ensure dropdown is fresh before sending (could be improved with caching)
       requestQuestionDropdown(subjectKey);
       const questionIndex = parseInt(selectedQuestionIndex.replace('q', '')) - 1;
       ws.send(JSON.stringify({
@@ -256,17 +297,14 @@ ws.onmessage = (event) => {
   }
 
   if (data.type === 'allStudents') {
-    // --- Populate student dropdown dynamically
     if (Array.isArray(data.students)) {
       populateStudentDropdown(data.students);
     }
-    // --- Also, show overlay for the "Show All Students" button
     let html = `<h2>Registered Students</h2><ul>`;
     data.students.forEach(s => {
       html += `<li><b>${s.id}</b>: ${s.name}</li>`;
     });
     html += '</ul>';
-    // Only show overlay if this was the result of the "Show All Students" button
     if (window.triggeredShowAllStudents) {
       showCustomOverlay(html);
       window.triggeredShowAllStudents = false;
@@ -274,7 +312,6 @@ ws.onmessage = (event) => {
   }
 
   if (data.type === 'questionsForSubject') {
-    // Always update the question dropdown (but only show overlay if requested)
     const questionDropdown = document.getElementById('question-no');
     if (questionDropdown) {
       questionDropdown.innerHTML = "";
@@ -285,7 +322,6 @@ ws.onmessage = (event) => {
         questionDropdown.appendChild(opt);
       });
     }
-    // Only show overlay if we just wanted to DISPLAY the questions
     if (showQuestionsOverlay) {
       let html = `<h2>Questions for ${data.subject}</h2><ol>`;
       data.questions.forEach((q, idx) => {
@@ -335,7 +371,6 @@ function showTeacherOverlay({ studentId, question, choiceA, choiceB, choiceC, ch
     overlay.id = 'teacher-overlay';
     document.body.appendChild(overlay);
   }
-  // Make sure fullscreen double-click is always enabled!
   addFullscreenOnDblClick(overlay);
 
   let feedbackHtml = "";
@@ -356,12 +391,14 @@ function showTeacherOverlay({ studentId, question, choiceA, choiceB, choiceC, ch
     ${answer ? `<div class="answer-row"><b>Submitted Answer:</b> ${answer}</div>` : ''}
     ${feedbackHtml}
     <div style="font-size:0.85em;color:#888;margin-top:10px;text-align:center;">
-      Double-click the modal background to enter fullscreen.
+      Double-click the modal background to enter fullscreen.<br>
+      Font size increases in fullscreen mode.
     </div>
     <button class="close-btn" id="teacher-overlay-close">Close</button>
   `;
   overlay.style.display = 'block';
   document.getElementById('teacher-overlay-close').onclick = () => {
+    exitFullScreen();
     overlay.style.display = 'none';
   };
 }
@@ -381,18 +418,19 @@ function showCustomOverlay(html) {
     overlay.style.width = '90%';
     document.body.appendChild(overlay);
   }
-  // Make sure fullscreen double-click is always enabled!
   addFullscreenOnDblClick(overlay);
 
   overlay.innerHTML = `
     ${html}
     <div style="font-size:0.85em;color:#888;margin-top:10px;text-align:center;">
-      Double-click the modal background to enter fullscreen.
+      Double-click the modal background to enter fullscreen.<br>
+      Font size increases in fullscreen mode.
     </div>
     <button class="close-btn" id="teacher-overlay-close">Close</button>
   `;
   overlay.style.display = 'block';
   document.getElementById('teacher-overlay-close').onclick = () => {
+    exitFullScreen();
     overlay.style.display = 'none';
   };
 }
