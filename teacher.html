@@ -113,7 +113,8 @@
         </form>
         <div id="qe-feedback" class="qe-feedback"></div>
         <div style="font-size:0.85em;color:#888;margin-top:10px;text-align:center;">
-          Double-click the modal background to enter fullscreen.
+          Double-click the modal background to enter fullscreen.<br>
+          Font size increases in fullscreen mode.
         </div>
       </div>
     </div>
@@ -146,6 +147,7 @@
       document.getElementById('question-entry-modal').style.display = 'flex';
     };
     document.getElementById('close-question-entry').onclick = function() {
+      if (typeof exitFullScreen === "function") exitFullScreen();
       document.getElementById('question-entry-modal').style.display = 'none';
     };
     document.getElementById('question-entry-form').onsubmit = function(e) {
@@ -173,13 +175,13 @@
       document.getElementById('qe-feedback').style.color = '#197d3b';
       this.reset();
       setTimeout(() => {
+        if (typeof exitFullScreen === "function") exitFullScreen();
         document.getElementById('question-entry-modal').style.display = 'none';
         document.getElementById('qe-feedback').textContent = '';
       }, 1000);
     };
   </script>
   <style>
-    /* Modal Overlay and Centering */
     .qe-modal {
       position: fixed;
       top: 0; left: 0; width: 100vw; height: 100vh;
@@ -207,6 +209,11 @@
       flex-direction: column;
       gap: 7px;
       animation: qeDropIn 0.5s;
+      font-size: 1rem;
+      transition: font-size 0.3s;
+    }
+    .fullscreen-font {
+      font-size: 1.5rem !important;
     }
     .qe-title {
       text-align: center;
